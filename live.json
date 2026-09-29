@@ -1,9 +1,45 @@
 {
-  "updated_at": null,
-  "agent": { "status": "standby", "task": "" },
-  "round": { "number": null, "status": "", "title": "" },
-  "holders": { "count": null, "as_of": null, "source": "" },
-  "queue": [],
+  "updated_at": "2026-09-29T02:14:37Z",
+  "agent": {
+    "status": "standby",
+    "task": "Foundations in progress: the site is live, the agent's repo and budget setup come next."
+  },
+  "round": {
+    "number": null,
+    "status": "",
+    "title": ""
+  },
+  "holders": {
+    "count": null,
+    "as_of": null,
+    "source": ""
+  },
+  "queue": [
+    {
+      "title": "Wallet roast",
+      "status": "proposed"
+    },
+    {
+      "title": "Bundle detector",
+      "status": "proposed"
+    },
+    {
+      "title": "Token graveyard",
+      "status": "proposed"
+    },
+    {
+      "title": "Solana payment toolkit",
+      "status": "proposed"
+    },
+    {
+      "title": "Dev wallet tracker",
+      "status": "proposed"
+    },
+    {
+      "title": "Fee claim tracker",
+      "status": "proposed"
+    }
+  ],
   "sessions": [],
   "ledger": []
 }

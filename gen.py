@@ -12,7 +12,7 @@ NAME = "Build.vote"        # project name, swapped in everywhere
 HANDLE = "BuildDotVote"    # X handle without @
 CA = ""                    # contract address; leave empty until launch
 BUY_URL = ""               # e.g. the pump.fun page; leave empty until launch
-GITHUB_URL = "https://github.com/you/repo"            # public repo; leave empty until it exists
+GITHUB_URL = "https://github.com/Benotos/buildvote"            # public repo; leave empty until it exists
 LIVE_JSON = "live.json"    # data file the live build page reads; a raw GitHub URL also works
 # ----------------------------------------------
 
@@ -532,7 +532,7 @@ files = {
  "whitepaper.html": (head("Whitepaper v0.1 · Build.vote", "Build.vote whitepaper, version 0.1 draft: mechanism, fees, the agent, safety and risks."), WHITEPAPER),
 }
 for name, (h, m) in files.items():
-    with open(os.path.join(OUT, name), "w") as f:
+    with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as f:
         html = h + "\n" + nav(name) + "\n" + m + "\n" + footer(name)
         html = html.replace("@BuildDotVote", "@" + HANDLE).replace("BuildDotVote", HANDLE).replace("Build.vote", NAME)
         f.write(html)
