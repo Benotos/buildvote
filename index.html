@@ -91,19 +91,19 @@
       <fieldset class="ballot__options">
         <legend class="sr-only">What should the agent build first?</legend>
         <label class="opt">
-          <input type="radio" name="choice" value="Wallet roast">
+          <input type="radio" name="choice" value="Rug radar">
           <span class="box" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path class="x x1" pathLength="1" d="M7 8c4.2 4.4 9 9.2 18 17.4"/><path class="x x2" pathLength="1" d="M25 7c-5 5.8-10.2 11-17.2 18.2"/></svg></span>
-          <span class="opt__text"><span class="opt__name">Wallet roast</span><span class="opt__desc">Paste a wallet, get a funny breakdown of its trading history.</span></span>
+          <span class="opt__text"><span class="opt__name">Rug radar</span><span class="opt__desc">Real time risk scores for every new pump.fun launch, streamed live.</span></span>
         </label>
         <label class="opt">
-          <input type="radio" name="choice" value="Bundle detector">
+          <input type="radio" name="choice" value="Agent treasury">
           <span class="box" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path class="x x1" pathLength="1" d="M7 8c4.2 4.4 9 9.2 18 17.4"/><path class="x x2" pathLength="1" d="M25 7c-5 5.8-10.2 11-17.2 18.2"/></svg></span>
-          <span class="opt__text"><span class="opt__name">Bundle detector</span><span class="opt__desc">Flag wallets funded from one source that bought together at launch.</span></span>
+          <span class="opt__text"><span class="opt__name">Agent treasury</span><span class="opt__desc">The agent manages its own fee wallet in public: pays its AI bill, runs buybacks, posts every tx.</span></span>
         </label>
         <label class="opt">
-          <input type="radio" name="choice" value="Token graveyard">
+          <input type="radio" name="choice" value="Smart money tracker">
           <span class="box" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path class="x x1" pathLength="1" d="M7 8c4.2 4.4 9 9.2 18 17.4"/><path class="x x2" pathLength="1" d="M25 7c-5 5.8-10.2 11-17.2 18.2"/></svg></span>
-          <span class="opt__text"><span class="opt__name">Token graveyard</span><span class="opt__desc">Dead tokens with their peak market cap and cause of death.</span></span>
+          <span class="opt__text"><span class="opt__name">Smart money tracker</span><span class="opt__desc">Wallets with a verified on-chain record, and what they buy and sell as it happens.</span></span>
         </label>
       </fieldset>
       <div class="ballot__actions">
@@ -125,15 +125,15 @@
   <section class="section wrap" aria-labelledby="builds-title">
     <div class="section__head">
       <h2 id="builds-title" data-split>What the agent can build</h2>
-      <p>Crypto tools, small enough to ship in one round. This is the idea pool. Holders vote on which ones get built, and anyone can propose more.</p>
+      <p>Real crypto products, built in public round by round. This is the idea pool. Holders vote on what gets built first, and anyone can propose more.</p>
     </div>
     <ol class="builds">
-      <li><span class="builds__n">01</span><div><h3>Wallet roast</h3><p>Paste a wallet, get a funny breakdown of its trading history.</p></div></li>
-      <li><span class="builds__n">02</span><div><h3>Bundle detector</h3><p>Flag wallets funded from one source that bought together at launch.</p></div></li>
-      <li><span class="builds__n">03</span><div><h3>Token graveyard</h3><p>Dead tokens with their peak market cap and cause of death.</p></div></li>
-      <li><span class="builds__n">04</span><div><h3>Solana payment toolkit</h3><p>Payment links and simple invoices paid in SOL or USDC, with a receipt page.</p></div></li>
-      <li><span class="builds__n">05</span><div><h3>Dev wallet tracker</h3><p>Follow a token's deployer wallet and see when it moves or sells.</p></div></li>
-      <li><span class="builds__n">06</span><div><h3>Fee claim tracker</h3><p>See when creator fees on a token were claimed and where they went.</p></div></li>
+      <li><span class="builds__n">01</span><div><h3>Rug radar</h3><p>Scores every new pump.fun launch in real time: dev wallet history, bundled buys, holder concentration and LP, streamed as a live risk feed.</p></div></li>
+      <li><span class="builds__n">02</span><div><h3>Agent treasury</h3><p>The agent runs its own fee wallet in public. It claims fees, pays its own AI bill and executes buybacks under hard limits written in code, and every transaction is posted.</p></div></li>
+      <li><span class="builds__n">03</span><div><h3>Smart money tracker</h3><p>Finds wallets with a real on-chain track record and streams what they buy and sell, with their verified PnL next to every move.</p></div></li>
+      <li><span class="builds__n">04</span><div><h3>CA deep scan</h3><p>Paste any contract address, get a full due diligence report in seconds: deployer history, bundles, top holders, LP status and a shareable risk card.</p></div></li>
+      <li><span class="builds__n">05</span><div><h3>Telegram alpha bot</h3><p>Everything above inside Telegram: scan a CA in chat, get alerts when tracked wallets buy, and a daily radar digest for groups.</p></div></li>
+      <li><span class="builds__n">06</span><div><h3>Agent bounty board</h3><p>When the agent hits something it cannot do alone, like design or testing, it posts a paid bounty funded from fees and pays the winner on-chain.</p></div></li>
     </ol>
   </section>
 
@@ -200,7 +200,7 @@
     <div class="section__head"><h2 id="faq-title" data-split>Questions</h2></div>
     <div class="faq">
       <details class="faq__item"><summary>Is the token live?</summary><p>Not yet. The contract address appears on this site and on X at launch. Anything posted anywhere else is not us.</p></details>
-      <details class="faq__item"><summary>What does the agent build?</summary><p>Crypto tools on Solana, one per round. The idea pool above is where options come from, and holders pick.</p></details>
+      <details class="faq__item"><summary>What does the agent build?</summary><p>Real Solana products: a live rug radar, a smart money tracker, a treasury the agent runs itself and more. Holders vote on the order.</p></details>
       <details class="faq__item"><summary>How does voting work?</summary><p>When a round opens, balances are snapshotted. You sign a message naming your choice. Weight follows balance up to a cap, and the full list of signatures is published so anyone can recount.</p></details>
       <details class="faq__item"><summary>Can whales take over a vote?</summary><p>Each wallet's weight is capped at a set share of the round's total vote. The draft cap is 5%. A cap does not stop someone splitting tokens across wallets, so we publish every signature for anyone to check.</p></details>
       <details class="faq__item"><summary>Where do creator fees go?</summary><p>API costs, buybacks, contributor rewards and a reserve. The draft split is on the tokenomics page. Every claim and spend links to its record.</p></details>

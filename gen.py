@@ -114,19 +114,19 @@ BUY = (f'<a class="btn btn--primary" href="{BUY_URL}" target="_blank" rel="noope
        else '<button type="button" class="btn btn--primary" disabled>Buy opens at launch</button>')
 
 BUILD_LIST = [
-  ("Wallet roast", "Paste a wallet, get a funny breakdown of its trading history."),
-  ("Bundle detector", "Flag wallets funded from one source that bought together at launch."),
-  ("Token graveyard", "Dead tokens with their peak market cap and cause of death."),
-  ("Solana payment toolkit", "Payment links and simple invoices paid in SOL or USDC, with a receipt page."),
-  ("Dev wallet tracker", "Follow a token's deployer wallet and see when it moves or sells."),
-  ("Fee claim tracker", "See when creator fees on a token were claimed and where they went."),
+  ("Rug radar", "Scores every new pump.fun launch in real time: dev wallet history, bundled buys, holder concentration and LP, streamed as a live risk feed."),
+  ("Agent treasury", "The agent runs its own fee wallet in public. It claims fees, pays its own AI bill and executes buybacks under hard limits written in code, and every transaction is posted."),
+  ("Smart money tracker", "Finds wallets with a real on-chain track record and streams what they buy and sell, with their verified PnL next to every move."),
+  ("CA deep scan", "Paste any contract address, get a full due diligence report in seconds: deployer history, bundles, top holders, LP status and a shareable risk card."),
+  ("Telegram alpha bot", "Everything above inside Telegram: scan a CA in chat, get alerts when tracked wallets buy, and a daily radar digest for groups."),
+  ("Agent bounty board", "When the agent hits something it cannot do alone, like design or testing, it posts a paid bounty funded from fees and pays the winner on-chain."),
 ]
 BUILD_ITEMS = "\n".join(f'      <li><span class="builds__n">{i+1:02d}</span><div><h3>{t}</h3><p>{d}</p></div></li>' for i,(t,d) in enumerate(BUILD_LIST))
 GH_LINE = (f'Submit work on <a href="{GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>.' if GITHUB_URL
            else 'The public repo link gets posted here and on X when it opens.')
 FAQ_ITEMS = [
   ("Is the token live?", "Not yet. The contract address appears on this site and on X at launch. Anything posted anywhere else is not us."),
-  ("What does the agent build?", "Crypto tools on Solana, one per round. The idea pool above is where options come from, and holders pick."),
+  ("What does the agent build?", "Real Solana products: a live rug radar, a smart money tracker, a treasury the agent runs itself and more. Holders vote on the order."),
   ("How does voting work?", "When a round opens, balances are snapshotted. You sign a message naming your choice. Weight follows balance up to a cap, and the full list of signatures is published so anyone can recount."),
   ("Can whales take over a vote?", "Each wallet's weight is capped at a set share of the round's total vote. The draft cap is 5%. A cap does not stop someone splitting tokens across wallets, so we publish every signature for anyone to check."),
   ("Where do creator fees go?", "API costs, buybacks, contributor rewards and a reserve. The draft split is on the tokenomics page. Every claim and spend links to its record."),
@@ -227,9 +227,9 @@ INDEX = f'''<main id="main">
       </div>
       <fieldset class="ballot__options">
         <legend class="sr-only">What should the agent build first?</legend>
-{opt("Wallet roast", "Paste a wallet, get a funny breakdown of its trading history.")}
-{opt("Bundle detector", "Flag wallets funded from one source that bought together at launch.")}
-{opt("Token graveyard", "Dead tokens with their peak market cap and cause of death.")}
+{opt("Rug radar", "Real time risk scores for every new pump.fun launch, streamed live.")}
+{opt("Agent treasury", "The agent manages its own fee wallet in public: pays its AI bill, runs buybacks, posts every tx.")}
+{opt("Smart money tracker", "Wallets with a verified on-chain record, and what they buy and sell as it happens.")}
       </fieldset>
       <div class="ballot__actions">
         <p id="wallet-status" class="wallet-status" aria-live="polite">No wallet connected.</p>
@@ -250,7 +250,7 @@ INDEX = f'''<main id="main">
   <section class="section wrap" aria-labelledby="builds-title">
     <div class="section__head">
       <h2 id="builds-title" data-split>What the agent can build</h2>
-      <p>Crypto tools, small enough to ship in one round. This is the idea pool. Holders vote on which ones get built, and anyone can propose more.</p>
+      <p>Real crypto products, built in public round by round. This is the idea pool. Holders vote on what gets built first, and anyone can propose more.</p>
     </div>
     <ol class="builds">
 {BUILD_ITEMS}

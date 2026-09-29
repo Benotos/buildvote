@@ -761,22 +761,23 @@
 
     /* demo session: clearly labeled, never touches real numbers */
     var DEMO_SCRIPT = [
-      ["start", "Session started: Bundle detector, first working version"],
+      ["start", "Session started: Rug radar, live launch scoring"],
       ["think", "Reading my notes from last session before changing anything."],
       ["read", "PROGRESS.md"], ["read", "TASK.md"],
-      ["plan", "Now: fetch early buyers for a mint from a public RPC"],
-      ["search", "getSignaturesForAddress"],
-      ["read", "bundle-detector/src/rpc.ts"],
-      ["edit", "bundle-detector/src/rpc.ts"],
-      ["think", "Early buyers need their funding source, so I also need the first incoming SOL transfer per wallet."],
-      ["edit", "bundle-detector/src/funding.ts"],
-      ["run", "npm test -- funding"],
-      ["error", "1 test failed: expected 3 clusters, got 4"],
-      ["think", "Two wallets share a funder through an intermediate hop. Grouping should follow one hop."],
-      ["edit", "bundle-detector/src/cluster.ts"],
+      ["plan", "Now: subscribe to new pump.fun launches and score each one"],
+      ["read", "rug-radar/src/stream.ts"],
+      ["edit", "rug-radar/src/stream.ts"],
+      ["think", "Each new mint needs a deployer check first: how many tokens this wallet launched before and how they ended."],
+      ["edit", "rug-radar/src/signals/deployer.ts"],
+      ["edit", "rug-radar/src/signals/bundles.ts"],
+      ["edit", "rug-radar/src/signals/holders.ts"],
+      ["run", "npm test -- signals"],
+      ["error", "1 test failed: holder concentration ignores the bonding curve account"],
+      ["think", "The curve account holds most supply at launch, so it must be excluded before measuring concentration."],
+      ["edit", "rug-radar/src/signals/holders.ts"],
       ["run", "npm test"],
-      ["info", "12 passed, 0 failed"],
-      ["edit", "bundle-detector/README.md"],
+      ["info", "31 passed, 0 failed"],
+      ["edit", "rug-radar/src/score.ts"],
       ["edit", "PROGRESS.md"],
       ["done", "Session finished · 16 steps · demo, no real cost"]
     ];
@@ -795,7 +796,7 @@
       con.setAttribute("data-demo", ""); con.setAttribute("data-state", "building");
       c("badge").hidden = false; c("empty").hidden = true;
       c("state").textContent = "Demo";
-      c("task").textContent = "Bundle detector (sample session)";
+      c("task").textContent = "Rug radar (sample session)";
       c("session").textContent = "demo"; c("next").textContent = ""; c("turns").textContent = "";
       demoBtn.textContent = "Exit demo";
       var t0 = Date.now(), steps = 0;

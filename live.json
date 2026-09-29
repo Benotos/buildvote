@@ -16,27 +16,27 @@
   },
   "queue": [
     {
-      "title": "Wallet roast",
+      "title": "Rug radar",
       "status": "proposed"
     },
     {
-      "title": "Bundle detector",
+      "title": "Agent treasury",
       "status": "proposed"
     },
     {
-      "title": "Token graveyard",
+      "title": "Smart money tracker",
       "status": "proposed"
     },
     {
-      "title": "Solana payment toolkit",
+      "title": "CA deep scan",
       "status": "proposed"
     },
     {
-      "title": "Dev wallet tracker",
+      "title": "Telegram alpha bot",
       "status": "proposed"
     },
     {
-      "title": "Fee claim tracker",
+      "title": "Agent bounty board",
       "status": "proposed"
     }
   ],
