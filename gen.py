@@ -1,5 +1,5 @@
 import os
-OUT = "buildvote"
+OUT = os.path.dirname(os.path.abspath(__file__))  # writes next to this file
 
 STAMP = '<svg class="stamp {cls}" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg>'
 CHECK = '<svg class="stamp stamp--check" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>'
@@ -12,7 +12,7 @@ NAME = "Build.vote"        # project name, swapped in everywhere
 HANDLE = "BuildDotVote"    # X handle without @
 CA = ""                    # contract address; leave empty until launch
 BUY_URL = ""               # e.g. the pump.fun page; leave empty until launch
-GITHUB_URL = ""            # public repo; leave empty until it exists
+GITHUB_URL = "https://github.com/you/repo"            # public repo; leave empty until it exists
 LIVE_JSON = "live.json"    # data file the live build page reads; a raw GitHub URL also works
 # ----------------------------------------------
 
@@ -495,6 +495,7 @@ LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL
       <header class="panel__head"><h2>Build queue</h2><span class="pill" data-count="queue">Empty</span></header>
       <ol class="feed" id="queue"></ol>
       <p class="empty" data-empty="queue">Nothing queued. The winner of round 1 lands here first. See the <a href="index.html#builds-title">idea pool</a>.</p>
+      <p class="panel__foot" data-foot="queue" hidden>Proposed ideas are candidates for round 1. Holders pick which one gets built.</p>
     </article>
     <article class="card panel">
       <header class="panel__head"><h2>Commits</h2><span class="pill" data-count="commits">Waiting for work</span></header>

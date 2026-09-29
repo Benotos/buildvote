@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Live build Â· Build.vote</title>
+<title>Live build · Build.vote</title>
 <meta name="description" content="Watch the agent work: build queue, commits, API spend and fee claims, each linked to its source.">
 <meta name="theme-color" content="#070c1a">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Build.vote">
-<meta property="og:title" content="Live build Â· Build.vote">
+<meta property="og:title" content="Live build · Build.vote">
 <meta property="og:description" content="Watch the agent work: build queue, commits, API spend and fee claims, each linked to its source.">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@BuildDotVote">
@@ -49,7 +49,7 @@
   </div>
 </header>
 
-<main id="main" data-live-json="live.json" data-github="">
+<main id="main" data-live-json="live.json" data-github="https://github.com/you/repo">
   <section class="page-head wrap">
     <h1 data-split>Live build</h1>
     <p class="lead">Where you watch the agent work: what it is building, what it spent and where the fees went. Every number is added up from the rows below, and every row links to its proof.</p>
@@ -63,12 +63,12 @@
   <section class="wrap" aria-labelledby="readouts-title">
     <h2 id="readouts-title" class="sr-only">Readouts</h2>
     <dl class="readouts">
-      <div class="readout" data-key="spend"><dt>API spend</dt><dd class="readout__v">â€”</dd><dd class="readout__n">Not live yet</dd></div>
-      <div class="readout" data-key="fees"><dt>Creator fees claimed</dt><dd class="readout__v">â€”</dd><dd class="readout__n">Not live yet</dd></div>
-      <div class="readout" data-key="commits"><dt>Commits</dt><dd class="readout__v">â€”</dd><dd class="readout__n">Repo opens at launch</dd></div>
-      <div class="readout" data-key="holders"><dt>Holders</dt><dd class="readout__v">â€”</dd><dd class="readout__n">Token not launched</dd></div>
-      <div class="readout" data-key="round"><dt>Current round</dt><dd class="readout__v">â€”</dd><dd class="readout__n">Round 1 opens after launch</dd></div>
-      <div class="readout" data-key="payouts"><dt>Contributor payouts</dt><dd class="readout__v">â€”</dd><dd class="readout__n">Not live yet</dd></div>
+      <div class="readout" data-key="spend"><dt>API spend</dt><dd class="readout__v">—</dd><dd class="readout__n">Not live yet</dd></div>
+      <div class="readout" data-key="fees"><dt>Creator fees claimed</dt><dd class="readout__v">—</dd><dd class="readout__n">Not live yet</dd></div>
+      <div class="readout" data-key="commits"><dt>Commits</dt><dd class="readout__v">—</dd><dd class="readout__n">Repo opens at launch</dd></div>
+      <div class="readout" data-key="holders"><dt>Holders</dt><dd class="readout__v">—</dd><dd class="readout__n">Token not launched</dd></div>
+      <div class="readout" data-key="round"><dt>Current round</dt><dd class="readout__v">—</dd><dd class="readout__n">Round 1 opens after launch</dd></div>
+      <div class="readout" data-key="payouts"><dt>Contributor payouts</dt><dd class="readout__v">—</dd><dd class="readout__n">Not live yet</dd></div>
     </dl>
   </section>
 
@@ -77,6 +77,7 @@
       <header class="panel__head"><h2>Build queue</h2><span class="pill" data-count="queue">Empty</span></header>
       <ol class="feed" id="queue"></ol>
       <p class="empty" data-empty="queue">Nothing queued. The winner of round 1 lands here first. See the <a href="index.html#builds-title">idea pool</a>.</p>
+      <p class="panel__foot" data-foot="queue" hidden>Proposed ideas are candidates for round 1. Holders pick which one gets built.</p>
     </article>
     <article class="card panel">
       <header class="panel__head"><h2>Commits</h2><span class="pill" data-count="commits">Waiting for work</span></header>
@@ -116,6 +117,7 @@
         <a href="tokenomics.html">Tokenomics</a>
         <a href="whitepaper.html">Whitepaper</a>
         <a href="https://x.com/BuildDotVote" target="_blank" rel="noopener noreferrer">X</a>
+        <a href="https://github.com/you/repo" target="_blank" rel="noopener noreferrer">GitHub</a>
       </nav>
     </div>
   </div>
