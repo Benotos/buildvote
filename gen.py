@@ -56,9 +56,11 @@ def head(title, desc):
 </head>'''
 
 def nav(current):
+    GH_NAV = f'      <a class="nav__gh" href="{GITHUB_URL}" target="_blank" rel="noopener noreferrer"><svg class=\"gh\" viewBox=\"0 0 16 16\" aria-hidden=\"true\" focusable=\"false\"><path fill=\"currentColor\" d=\"M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z\"/></svg><span>GitHub</span><span class="sr-only"> (opens in a new tab)</span></a>' if GITHUB_URL else ''
     links = "\n".join(
         f'      <a href="{f}"{AC if f == current else ""}>{n}</a>' for f, n in PAGES)
-    return f'''<body>
+    BODYCLS = 'page-home' if current == 'index.html' else ''
+    return f'''<body class="{BODYCLS}">
 <a class="skip" href="#main">Skip to content</a>
 <div class="preloader" aria-hidden="true"><div class="preloader__mark"><svg class="stamp" viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Build.vote</span></div></div>
 <script>try{{if(sessionStorage.getItem("bv-seen")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("no-preload");sessionStorage.setItem("bv-seen","1")}}catch(e){{document.documentElement.classList.add("no-preload")}}</script>
@@ -72,6 +74,7 @@ def nav(current):
     <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-links"><span class="sr-only">Menu</span><span class="bars" aria-hidden="true"></span></button>
     <nav id="nav-links" class="nav__links" aria-label="Main">
 {links}
+{GH_NAV}
       <a class="nav__x" href="https://x.com/BuildDotVote" target="_blank" rel="noopener noreferrer">@BuildDotVote<span class="sr-only"> on X (opens in a new tab)</span></a>
     </nav>
   </div>
@@ -121,6 +124,10 @@ BUILD_LIST = [
   ("Telegram alpha bot", "Everything above inside Telegram: scan a CA in chat, get alerts when tracked wallets buy, and a daily radar digest for groups."),
   ("Agent bounty board", "When the agent hits something it cannot do alone, like design or testing, it posts a paid bounty funded from fees and pays the winner on-chain."),
 ]
+MORE_IDEAS = ["Launch sniper alerts", "LP lock checker", "Wallet cluster map", "PnL share cards", "Airdrop checker", "Dev sell alerts", "Holder heatmap", "KOL call tracker", "Token migration watcher", "Copy trade simulator"]
+MORE_CHIPS = "\n".join(f'        <li>{x}</li>' for x in MORE_IDEAS)
+PROPOSE = (f'<a class="btn btn--ghost" href="{GITHUB_URL}/issues/new?title=Idea:%20&amp;labels=idea" target="_blank" rel="noopener noreferrer">Propose an idea<span class="sr-only"> on GitHub (opens in a new tab)</span></a>' if GITHUB_URL
+           else '<a class="btn btn--ghost" href="https://x.com/BuildDotVote" target="_blank" rel="noopener noreferrer">Propose an idea on X</a>')
 BUILD_ITEMS = "\n".join(f'      <li><span class="builds__n">{i+1:02d}</span><div><h3>{t}</h3><p>{d}</p></div></li>' for i,(t,d) in enumerate(BUILD_LIST))
 GH_LINE = (f'Submit work on <a href="{GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>.' if GITHUB_URL
            else 'The public repo link gets posted here and on X when it opens.')
@@ -187,7 +194,7 @@ FLOW = f"""  <section class="section wrap flow" aria-labelledby="flow-title">
 """
 
 INDEX = f'''<main id="main">
-  <section class="hero wrap" aria-labelledby="hero-title">
+  <section class="hero hero--center wrap" aria-labelledby="hero-title">
     <h1 id="hero-title" data-split><span class="line">{STAMP.format(cls="stamp--draw")}You vote.</span><span class="line">An AI agent builds it, live.</span></h1>
     <p class="lead">Build.vote is an experiment in software directed by its holders. You pick what gets built next. The agent works in public, and its commits, API spend and creator fee claims show up on a dashboard anyone can verify.</p>
     <ul class="tags" aria-label="Project status">
@@ -255,6 +262,14 @@ INDEX = f'''<main id="main">
     <ol class="builds">
 {BUILD_ITEMS}
     </ol>
+    <div class="more-ideas">
+      <p class="more-ideas__label">More in the pool</p>
+      <ul class="chips">
+{MORE_CHIPS}
+        <li class="chips__more">and more every round</li>
+      </ul>
+      {PROPOSE}
+    </div>
   </section>
 
   <section class="hs" aria-labelledby="round-title">

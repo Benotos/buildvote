@@ -416,7 +416,7 @@
       renderer.setSize(w, h, false);
       if (composer) { composer.setSize(w, h); bloom.setSize(w / 2, h / 2); }
       camera.aspect = w / h;
-      baseX = camera.aspect > 1.15 ? -6.5 : 0;
+      baseX = document.body.classList.contains("page-home") ? 0 : (camera.aspect > 1.15 ? -6.5 : 0);
       camera.position.z = camera.aspect < 0.8 ? 34 : 24;
       camera.updateProjectionMatrix();
     }
