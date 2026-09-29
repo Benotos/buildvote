@@ -205,9 +205,9 @@ INDEX = f'''<main id="main">
     <h1 id="hero-title" data-split><span class="line">{STAMP.format(cls="stamp--draw")}You vote.</span><span class="line">An AI agent builds it, live.</span></h1>
     <p class="lead">Build.vote is an experiment in software directed by its holders. You pick what gets built next. The agent works in public, and its commits, API spend and creator fee claims show up on a dashboard anyone can verify.</p>
     <ul class="tags" aria-label="Project status">
-      <li><b>Token:</b> {"live" if CA else "not launched"}</li>
-      <li><b>Voting:</b> not live</li>
-      <li><b>Fee split:</b> published before launch</li>
+      <li class="tag--agent" data-agent-tag><b>Agent:</b> <span>connecting</span></li>
+      <li><b>Token:</b> {"live" if CA else "launching soon"}</li>
+      <li><b>Voting:</b> opens at launch</li>
     </ul>
     <div class="ca" role="group" aria-label="Contract address">
       <span class="ca__label">CA</span>
@@ -216,9 +216,16 @@ INDEX = f'''<main id="main">
     </div>
     <div class="btn-row hero__cta">
       {BUY}
-      <a class="btn btn--ghost" href="#ballot-title">Try the draft ballot</a>
+      <a class="btn btn--ghost" href="#ballot-title">Try the practice ballot</a>
       <a class="btn btn--ghost" href="live.html">Watch the live build</a>
     </div>
+    <a class="livebar" href="live.html" data-livebar data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL}" hidden>
+      <span class="livebar__dot" aria-hidden="true"></span>
+      <span class="livebar__state">Agent</span>
+      <span class="livebar__task"></span>
+      <span class="livebar__commit"></span>
+      <span class="livebar__go">Watch live →</span>
+    </a>
     <a class="scroll-cue" href="#ballot-title" aria-label="Scroll to the ballot"><span></span></a>
   </section>
 
@@ -229,14 +236,14 @@ INDEX = f'''<main id="main">
   <section class="section wrap ballot-section" aria-labelledby="ballot-title">
     <div class="ballot-intro">
       <h2 id="ballot-title" data-split>Mark the ballot</h2>
-      <p>This is the kind of choice a round asks. Mark one option, connect a wallet if you want, and sign a preview message.</p>
+      <p>This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now, and your mark counts for real once voting opens at launch.</p>
       <p>Signing proves you control the wallet. It moves nothing, costs nothing and approves nothing.</p>
-      <p class="muted small">These three options are a draft. The real round 1 ballot gets posted on X before voting opens.</p>
+      <p class="muted small">The final round 1 ballot is posted on X before voting opens.</p>
     </div>
 
     <form class="card ballot" id="ballot" data-tilt="3" aria-labelledby="ballot-name" aria-describedby="ballot-disclaimer" novalidate>
       <div class="ballot__head">
-        <p class="ballot__title" id="ballot-name">Round 1 · draft ballot</p>
+        <p class="ballot__title" id="ballot-name">Round 1 · practice ballot</p>
         <p class="ballot__hint">Mark one</p>
       </div>
       <fieldset class="ballot__options">
@@ -249,7 +256,7 @@ INDEX = f'''<main id="main">
         <p id="wallet-status" class="wallet-status" aria-live="polite">No wallet connected.</p>
         <div class="btn-row">
           <button type="button" id="connect" class="btn btn--ghost">Connect wallet</button>
-          <button type="button" id="sign" class="btn btn--primary" disabled>Sign vote preview</button>
+          <button type="button" id="sign" class="btn btn--primary" disabled>Sign my vote</button>
         </div>
         <details class="msg">
           <summary>See the exact message you would sign</summary>
@@ -257,7 +264,7 @@ INDEX = f'''<main id="main">
         </details>
         <p id="sig-out" class="sig-out" role="status" aria-live="polite"></p>
       </div>
-      <p id="ballot-disclaimer" class="ballot__foot">{STAMP.format(cls="stamp--static")}<span>Preview only. You sign a plain text message, never a transaction. Nothing is sent to a server and no vote is counted.</span></p>
+      <p id="ballot-disclaimer" class="ballot__foot">{STAMP.format(cls="stamp--static")}<span>Practice round: you sign a plain text message, never a transaction. Votes start counting when voting opens at launch.</span></p>
     </form>
   </section>
 
@@ -335,9 +342,12 @@ INDEX = f'''<main id="main">
 </main>'''
 
 def tl(n, title, status, text, done, live=False):
-    pill = '<span class="pill pill--live">In progress</span>' if live else '<span class="pill">Planned</span>'
-    return f'''    <li class="tl{" tl--live" if live else ""}">
-      <span class="tl__box" aria-hidden="true"></span>
+    state = status or ("live" if live else "planned")
+    pill = {"done": '<span class="pill pill--done">Done</span>', "live": '<span class="pill pill--live">In progress</span>',
+            "next": '<span class="pill pill--next">Up next</span>'}.get(state, '<span class="pill">Planned</span>')
+    box = STAMP.format(cls="stamp--static") if state == "done" else ""
+    return f'''    <li class="tl tl--{state}">
+      <span class="tl__box" aria-hidden="true">{box}</span>
       <article class="card" data-tilt="4">
         <div class="tl__top"><span class="tl__step">Step {n}</span>{pill}</div>
         <h2>{title}</h2>
@@ -349,14 +359,14 @@ def tl(n, title, status, text, done, live=False):
 ROADMAP = f'''<main id="main">
   <section class="page-head wrap">
     <h1 data-split>Roadmap</h1>
-    <p class="lead">What happens, in order. There are no dates here, because none are fixed yet. Dates get added when they are real.</p>
+    <p class="lead">What ships, in order. Foundations is done and the agent is already building in public. Dates are added as they are locked in.</p>
   </section>
   <section class="wrap" aria-label="Roadmap steps">
     <ol class="timeline">
-{tl(1, "Foundations", "", "This site, the draft whitepaper, draft fee rules and the agent's working setup: a public repo, a hard API budget and full logging.", "the site is live, the whitepaper is public and the agent can run end to end on a test task.", live=True)}
-{tl(2, "Launch", "", "The token goes live. Final supply, distribution and the fee split are published before launch, not after.", "the token exists and the final parameters are posted and linked from this site.")}
+{tl(1, "Foundations", "done", "This site, the whitepaper, the fee rules and the agent's working setup: a public repo, hard usage limits and full logging. The agent is already building in public.", "the site is live, the whitepaper is public and the agent can run end to end on a test task.")}
+{tl(2, "Launch", "next", "The token goes live. Final supply, distribution and the fee split are published before launch, not after.", "the token exists and the final parameters are posted and linked from this site.")}
 {tl(3, "Voting backend", "", "Balance snapshots, signed message checks and a public tally that anyone can recompute from the raw signatures.", "a test round runs with real signatures and the tally can be reproduced by someone outside the team.")}
-{tl(4, "Live dashboard", "", "One page for commits, API spend and creator fee claims, each linked to its source record.", "every number on the dashboard links to a commit, an invoice log or a transaction.")}
+{tl(4, "Live dashboard", "live", "One page for commits, API spend and creator fee claims, each linked to its source record.", "every number on the dashboard links to a commit, an invoice log or a transaction.")}
 {tl(5, "Round 1", "", "The first real ballot. Holders vote, the agent builds the winner in public and ships it.", "the winning tool is live and its build log and costs are public.")}
 {tl(6, "Ongoing rounds", "", "Regular rounds, with the rules adjusted in public as we learn what works.", "this never finishes by design. Each round gets its own write up.")}
     </ol>
@@ -367,8 +377,8 @@ ROADMAP = f'''<main id="main">
 TOKENOMICS = f'''<main id="main">
   <section class="page-head wrap">
     <h1 data-split>Tokenomics</h1>
-    <p class="lead">How creator fees are meant to flow and how voting weight is meant to work. All of it is a draft.</p>
-    <div class="draft-note" role="note">{STAMP.format(cls="stamp--static")}<p><strong>Draft.</strong> Every number and rule on this page can change. The final version is published before launch and linked here. The token has not launched, so there is no supply, price, market cap or holder count to show.</p></div>
+    <p class="lead">Where creator fees go and how voting weight works.</p>
+    <div class="draft-note" role="note">{STAMP.format(cls="stamp--static")}<p><strong>Draft v0.1.</strong> Final numbers are locked and linked here at launch.</p></div>
   </section>
 
   <section class="wrap" aria-labelledby="fees-title">
@@ -511,12 +521,12 @@ LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL
       <div class="console__task" role="status" aria-live="polite">
         <span class="dot" aria-hidden="true"></span>
         <b data-c="state">Standby</b>
-        <span data-c="task">Starts at launch. Creator fees fund the first session.</span>
+        <span data-c="task">Connecting to the agent…</span>
         <span class="console__next" data-c="next"></span>
       </div>
-      <p class="console__badge" data-c="badge" hidden>Demo: simulated session, not real agent activity</p>
+      <p class="console__badge" data-c="badge" hidden>Demo replay: sample session, not real agent activity</p>
       <ol class="console__feed" id="feed"></ol>
-      <p class="console__empty" data-c="empty">The agent wakes up when creator fees arrive after launch. From then on, every file it reads, every edit and every command appears here as it happens. Press "Watch a demo" to see what that looks like.<span class="console__cursor" aria-hidden="true"></span></p>
+      <p class="console__empty" data-c="empty">Loading the latest session…<span class="console__cursor" aria-hidden="true"></span></p>
     </div>
     <aside class="card spend" aria-labelledby="spend-title">
       <div class="panel__head"><h2 id="spend-title">Spend per session</h2><span class="pill" data-c="spendtotal">—</span></div>
@@ -535,7 +545,7 @@ LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL
     <dl class="readouts">
       {readout("spend", "API spend", "Not live yet")}
       {readout("fees", "Creator fees claimed", "Not live yet")}
-      {readout("commits", "Agent commits", "Agent repo not public yet")}
+      {readout("commits", "Agent commits", "Loading…")}
       {readout("holders", "Holders", "Token not launched")}
       {readout("round", "Current round", "Round 1 opens after launch")}
       {readout("payouts", "Contributor payouts", "Not live yet")}

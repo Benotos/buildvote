@@ -56,9 +56,9 @@
     <h1 id="hero-title" data-split><span class="line"><svg class="stamp stamp--draw" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg>You vote.</span><span class="line">An AI agent builds it, live.</span></h1>
     <p class="lead">Build.vote is an experiment in software directed by its holders. You pick what gets built next. The agent works in public, and its commits, API spend and creator fee claims show up on a dashboard anyone can verify.</p>
     <ul class="tags" aria-label="Project status">
-      <li><b>Token:</b> not launched</li>
-      <li><b>Voting:</b> not live</li>
-      <li><b>Fee split:</b> published before launch</li>
+      <li class="tag--agent" data-agent-tag><b>Agent:</b> <span>connecting</span></li>
+      <li><b>Token:</b> launching soon</li>
+      <li><b>Voting:</b> opens at launch</li>
     </ul>
     <div class="ca" role="group" aria-label="Contract address">
       <span class="ca__label">CA</span>
@@ -67,9 +67,16 @@
     </div>
     <div class="btn-row hero__cta">
       <button type="button" class="btn btn--primary" disabled>Buy opens at launch</button>
-      <a class="btn btn--ghost" href="#ballot-title">Try the draft ballot</a>
+      <a class="btn btn--ghost" href="#ballot-title">Try the practice ballot</a>
       <a class="btn btn--ghost" href="live.html">Watch the live build</a>
     </div>
+    <a class="livebar" href="live.html" data-livebar data-live-json="https://raw.githubusercontent.com/builddotvote/buildvote-agent/status/live.json" data-github="https://github.com/builddotvote/buildvote-agent" hidden>
+      <span class="livebar__dot" aria-hidden="true"></span>
+      <span class="livebar__state">Agent</span>
+      <span class="livebar__task"></span>
+      <span class="livebar__commit"></span>
+      <span class="livebar__go">Watch live →</span>
+    </a>
     <a class="scroll-cue" href="#ballot-title" aria-label="Scroll to the ballot"><span></span></a>
   </section>
 
@@ -80,14 +87,14 @@
   <section class="section wrap ballot-section" aria-labelledby="ballot-title">
     <div class="ballot-intro">
       <h2 id="ballot-title" data-split>Mark the ballot</h2>
-      <p>This is the kind of choice a round asks. Mark one option, connect a wallet if you want, and sign a preview message.</p>
+      <p>This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now, and your mark counts for real once voting opens at launch.</p>
       <p>Signing proves you control the wallet. It moves nothing, costs nothing and approves nothing.</p>
-      <p class="muted small">These three options are a draft. The real round 1 ballot gets posted on X before voting opens.</p>
+      <p class="muted small">The final round 1 ballot is posted on X before voting opens.</p>
     </div>
 
     <form class="card ballot" id="ballot" data-tilt="3" aria-labelledby="ballot-name" aria-describedby="ballot-disclaimer" novalidate>
       <div class="ballot__head">
-        <p class="ballot__title" id="ballot-name">Round 1 · draft ballot</p>
+        <p class="ballot__title" id="ballot-name">Round 1 · practice ballot</p>
         <p class="ballot__hint">Mark one</p>
       </div>
       <fieldset class="ballot__options">
@@ -112,7 +119,7 @@
         <p id="wallet-status" class="wallet-status" aria-live="polite">No wallet connected.</p>
         <div class="btn-row">
           <button type="button" id="connect" class="btn btn--ghost">Connect wallet</button>
-          <button type="button" id="sign" class="btn btn--primary" disabled>Sign vote preview</button>
+          <button type="button" id="sign" class="btn btn--primary" disabled>Sign my vote</button>
         </div>
         <details class="msg">
           <summary>See the exact message you would sign</summary>
@@ -120,7 +127,7 @@
         </details>
         <p id="sig-out" class="sig-out" role="status" aria-live="polite"></p>
       </div>
-      <p id="ballot-disclaimer" class="ballot__foot"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Preview only. You sign a plain text message, never a transaction. Nothing is sent to a server and no vote is counted.</span></p>
+      <p id="ballot-disclaimer" class="ballot__foot"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Practice round: you sign a plain text message, never a transaction. Votes start counting when voting opens at launch.</span></p>
     </form>
   </section>
 

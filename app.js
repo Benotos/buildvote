@@ -151,16 +151,16 @@
 
     function buildMessage(issuedAt) {
       return [
-        (document.documentElement.getAttribute("data-brand") || "Build.vote") + " vote preview",
+        (document.documentElement.getAttribute("data-brand") || "Build.vote") + " vote",
         "",
-        "Round: 1 (draft ballot)",
+        "Round: 1 (practice round)",
         "Choice: " + (state.choice || "(none selected)"),
         "Wallet: " + (state.pubkey || "(not connected)"),
         "Nonce: " + state.nonce,
         "Issued at: " + (issuedAt || "(set when you sign)"),
         "",
         "This is a signed message, not a transaction.",
-        "It moves no funds, approves nothing and is not counted."
+        "It moves no funds and approves nothing."
       ].join("\n");
     }
 
@@ -279,7 +279,7 @@
       var brand = document.documentElement.getAttribute("data-brand") || "Build.vote";
       var xLink = document.querySelector(".nav__x");
       var handle = xLink ? (xLink.getAttribute("href").split("/").pop() || "") : "";
-      var text = "I just marked " + r.choice + " on the " + brand + " draft ballot. Holders vote, an AI agent builds it live." + (handle ? " @" + handle : "");
+      var text = "I just marked " + r.choice + " on the " + brand + " ballot. Holders vote, an AI agent builds it live." + (handle ? " @" + handle : "");
       var share = "https://x.com/intent/post?text=" + encodeURIComponent(text) + (/^https:/.test(location.href) ? "&url=" + encodeURIComponent(location.origin + location.pathname) : "");
       var time = r.at.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 
@@ -298,7 +298,7 @@
           "<div><dt>Signed</dt><dd>" + escapeHtml(time) + "</dd></div>" +
           "<div><dt>Signature</dt><dd><code>" + escapeHtml(r.sig.slice(0, 10) + "…" + r.sig.slice(-6)) + "</code></dd></div>" +
         "</dl>" +
-        '<p class="receipt__note">This is what a real vote looks like. In a live round this signature gets checked against the snapshot and added to the public tally. This preview was not sent anywhere.</p>' +
+        '<p class="receipt__note">Practice round. When voting opens at launch, signatures like this one are checked against the snapshot and added to the public tally.</p>' +
         '<div class="btn-row">' +
           '<a class="btn btn--primary" href="' + escapeHtml(share) + '" target="_blank" rel="noopener noreferrer">Share on X</a>' +
           '<button type="button" class="btn btn--ghost" data-act="copy">Copy signature</button>' +
@@ -715,6 +715,7 @@
       });
       while (feedEl.children.length > 120) feedEl.removeChild(feedEl.firstChild);
       c("empty").hidden = !!feed.length;
+      if (!feed.length) c("empty").firstChild.textContent = "No session output yet. The next session streams here as it runs. ";
       feedEl.scrollTop = feedEl.scrollHeight;
       pump();
     }
@@ -727,7 +728,7 @@
       if (state === "building" && d.updated_at && Date.now() - Date.parse(d.updated_at) > 2 * 3600 * 1000) state = "idle";
       con.setAttribute("data-state", state);
       c("state").textContent = { building: "Building", idle: "Idle", standby: "Standby", paused: "Paused" }[state];
-      c("task").textContent = a.task || (state === "standby" ? "Starts at launch. Creator fees fund the first session." : "");
+      c("task").textContent = a.task || (state === "standby" ? "Waiting for the next session." : "");
       c("session").textContent = a.session ? "session #" + a.session : "no session";
       c("turns").textContent = a.turns ? a.turns + " steps" : "";
       var feed = Array.isArray(d.feed) ? d.feed : [];
@@ -779,7 +780,7 @@
       ["info", "31 passed, 0 failed"],
       ["edit", "rug-radar/src/score.ts"],
       ["edit", "PROGRESS.md"],
-      ["done", "Session finished · 16 steps · demo, no real cost"]
+      ["done", "Session finished · 16 steps · demo replay"]
     ];
     var demoTimers = [], demoClock = 0;
     function stopDemoTimers() { demoTimers.forEach(clearTimeout); demoTimers = []; clearInterval(demoClock); }
@@ -813,7 +814,7 @@
             clearInterval(demoClock);
             con.setAttribute("data-state", "idle");
             c("state").textContent = "Demo finished";
-            c("task").textContent = "Real sessions start at launch.";
+            c("task").textContent = "Exit the demo to see the real agent.";
           }
         }, delay));
       });
@@ -941,6 +942,48 @@
     document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else { loadJson(); start(); } });
   }
 
+
+  /* ---------- Home: live agent strip ---------- */
+  function initHomeLive() {
+    var bar = document.querySelector("[data-livebar]"), tag = document.querySelector("[data-agent-tag]");
+    if (!bar) return;
+    var url = bar.getAttribute("data-live-json"), gh = (bar.getAttribute("data-github") || "").match(/github\.com\/([^\/]+)\/([^\/#?]+)/);
+    function ago(iso) {
+      var t = Date.parse(iso); if (!t) return "";
+      var s = Math.max(0, (Date.now() - t) / 1000);
+      return s < 60 ? "just now" : s < 3600 ? Math.floor(s / 60) + "m ago" : s < 86400 ? Math.floor(s / 3600) + "h ago" : Math.floor(s / 86400) + "d ago";
+    }
+    var WORD = { building: "Building now", idle: "Between sessions", standby: "Standing by", paused: "Paused" };
+    function load() {
+      if (!url) return;
+      fetch(url + (url.indexOf("?") > -1 ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.agent) return;
+          var st = d.agent.status || "standby";
+          if (st === "building" && d.updated_at && Date.now() - Date.parse(d.updated_at) > 2 * 3600 * 1000) st = "idle";
+          var task = (d.agent.task || "").replace(/^Last session:\s*/, "");
+          bar.setAttribute("data-state", st);
+          bar.querySelector(".livebar__state").textContent = WORD[st] || "Agent";
+          bar.querySelector(".livebar__task").textContent = task + (d.agent.session ? " · session #" + d.agent.session : "");
+          bar.hidden = false;
+          if (tag) { tag.setAttribute("data-state", st); tag.querySelector("span").textContent = st === "building" ? "building now" : st === "idle" ? "online" : st; }
+        }).catch(function () {});
+    }
+    function commits() {
+      if (!gh) return;
+      fetch("https://api.github.com/repos/" + gh[1] + "/" + gh[2] + "/commits?per_page=1")
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (list) {
+          if (!list || !list[0]) return;
+          var m = (list[0].commit.message || "").split("\n")[0];
+          bar.querySelector(".livebar__commit").textContent = "last commit " + ago(list[0].commit.author.date) + ": " + m;
+        }).catch(function () {});
+    }
+    load(); commits();
+    setInterval(load, 30000); setInterval(commits, 180000);
+  }
+
   /* ---------- Copy contract address ---------- */
   function initCopy() {
     var btn = document.querySelector(".ca__copy");
@@ -961,6 +1004,7 @@
 
   function init() {
     initCopy();
+    initHomeLive();
     initLive();
     initMotion();
     initSpotlight();
