@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Round admin · Build.vote</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { background: #070c1a; }
+  .adm { max-width: 640px; margin: 48px auto; padding: 0 16px; }
+  .adm .card { padding: 24px; margin-bottom: 20px; }
+  .adm label { display: block; margin: 14px 0 6px; color: var(--text); font-weight: 600; }
+  .adm input, .adm textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line-strong, #2a3350); background: rgba(255,255,255,.04); color: var(--text, #eaf0ff); font: inherit; }
+  .adm textarea { min-height: 110px; }
+  .adm .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .adm pre { white-space: pre-wrap; word-break: break-word; font-size: .8rem; color: var(--text-soft, #c5cde3); max-height: 320px; overflow: auto; }
+  .adm .btn-row { margin-top: 18px; }
+  @media (max-width: 560px) { .adm .row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main class="adm">
+  <h1>Round admin</h1>
+  <p class="muted">Not linked anywhere. Only works with the ADMIN_KEY set in Vercel. Opening a round takes the holder snapshot right then.</p>
+
+  <div class="card">
+    <label for="key">Admin key</label>
+    <input id="key" type="password" autocomplete="off">
+    <label for="title">Question</label>
+    <input id="title" value="What should the agent build first?">
+    <label for="opts">Options, one per line</label>
+    <textarea id="opts">Rug radar
+Agent treasury
+Smart money tracker</textarea>
+    <div class="row">
+      <div><label for="num">Round number</label><input id="num" type="number" min="1" value="1"></div>
+      <div><label for="hours">Hours open</label><input id="hours" type="number" min="1" value="48"></div>
+      <div><label for="min">Min tokens</label><input id="min" type="number" min="0" value="0"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn--primary" id="open" type="button">Open round + snapshot</button>
+      <button class="btn btn--ghost" id="close" type="button">Close round now</button>
+      <button class="btn btn--ghost" id="check" type="button">Check tally</button>
+    </div>
+  </div>
+  <div class="card"><pre id="out">Ready.</pre></div>
+</main>
+<script>
+(function () {
+  var out = document.getElementById("out");
+  function $(id) { return document.getElementById(id); }
+  function show(x) { out.textContent = typeof x === "string" ? x : JSON.stringify(x, null, 2); }
+  function post(body) {
+    show("Working… (the snapshot can take a few seconds)");
+    return fetch("api/round", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + $("key").value.trim() }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).then(show).catch(function (e) { show("Error: " + e.message); });
+  }
+  $("open").onclick = function () {
+    var opts = $("opts").value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!confirm("Open round " + $("num").value + " with " + opts.length + " options? The snapshot is taken now.")) return;
+    post({ action: "open", number: +$("num").value, title: $("title").value, options: opts, hours: +$("hours").value, min_tokens: +$("min").value });
+  };
+  $("close").onclick = function () { if (confirm("Close the current round now?")) post({ action: "close" }); };
+  $("check").onclick = function () { fetch("api/vote?full=1", { cache: "no-store" }).then(function (r) { return r.json(); }).then(show); };
+})();
+</script>
+</body>
+</html>

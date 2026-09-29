@@ -207,7 +207,7 @@ INDEX = f'''<main id="main">
     <ul class="tags" aria-label="Project status">
       <li class="tag--agent" data-agent-tag><b>Agent:</b> <span>connecting</span></li>
       <li><b>Token:</b> {"live" if CA else "launching soon"}</li>
-      <li><b>Voting:</b> round 1 soon</li>
+      <li data-vote-tag><b>Voting:</b> <span>round 1 soon</span></li>
     </ul>
     <div class="ca" role="group" aria-label="Contract address">
       <span class="ca__label">CA</span>
@@ -216,7 +216,7 @@ INDEX = f'''<main id="main">
     </div>
     <div class="btn-row hero__cta">
       {BUY}
-      <a class="btn btn--ghost" href="#ballot-title">Try the practice ballot</a>
+      <a class="btn btn--ghost" href="#ballot-title" data-vote-cta>Try the practice ballot</a>
       <a class="btn btn--ghost" href="live.html">Watch the live build</a>
     </div>
     <a class="livebar" href="live.html" data-livebar data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL}" hidden>
@@ -236,9 +236,9 @@ INDEX = f'''<main id="main">
   <section class="section wrap ballot-section" aria-labelledby="ballot-title">
     <div class="ballot-intro">
       <h2 id="ballot-title" data-split>Mark the ballot</h2>
-      <p>This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now. Real votes are cast when round 1 opens.</p>
+      <p id="ballot-lead">This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now. Real votes are cast when round 1 opens, and this ballot switches to live on its own.</p>
       <p>Signing proves you control the wallet. It moves nothing, costs nothing and approves nothing.</p>
-      <p class="muted small">The final round 1 ballot is posted on X before voting opens.</p>
+      <p class="muted small" data-practice-only>The round 1 ballot is posted on X when voting opens.</p>
     </div>
 
     <form class="card ballot" id="ballot" data-tilt="3" aria-labelledby="ballot-name" aria-describedby="ballot-disclaimer" novalidate>
@@ -359,15 +359,15 @@ def tl(n, title, status, text, done, live=False):
 ROADMAP = f'''<main id="main">
   <section class="page-head wrap">
     <h1 data-split>Roadmap</h1>
-    <p class="lead">What ships, in order. Foundations and launch are done, and the agent is building in public. Dates are added as they are locked in.</p>
+    <p class="lead">What ships, in order. Foundations, launch and the voting backend are done, and the agent is building in public. Dates are added as they are locked in.</p>
   </section>
   <section class="wrap" aria-label="Roadmap steps">
     <ol class="timeline">
 {tl(1, "Foundations", "done", "This site, the whitepaper, the fee rules and the agent's working setup: a public repo, hard usage limits and full logging. The agent is already building in public.", "the site is live, the whitepaper is public and the agent can run end to end on a test task.")}
 {tl(2, "Launch", "done", "The token is live. Supply, holders and the fee split are public and linked from this site.", "the token exists and the final parameters are posted and linked from this site.")}
-{tl(3, "Voting backend", "next", "Balance snapshots, signed message checks and a public tally that anyone can recompute from the raw signatures.", "a test round runs with real signatures and the tally can be reproduced by someone outside the team.")}
+{tl(3, "Voting backend", "done", "Balance snapshots, signed message checks and a public tally that anyone can recompute from the raw signatures.", "a test round runs with real signatures and the tally can be reproduced by someone outside the team.")}
 {tl(4, "Live dashboard", "live", "One page for commits, API spend and creator fee claims, each linked to its source record.", "every number on the dashboard links to a commit, an invoice log or a transaction.")}
-{tl(5, "Round 1", "", "The first real ballot. Holders vote, the agent builds the winner in public and ships it.", "the winning tool is live and its build log and costs are public.")}
+{tl(5, "Round 1", "next", "The first real ballot. Holders vote, the agent builds the winner in public and ships it.", "the winning tool is live and its build log and costs are public.")}
 {tl(6, "Ongoing rounds", "", "Regular rounds, with the rules adjusted in public as we learn what works.", "this never finishes by design. Each round gets its own write up.")}
     </ol>
     <p class="legend-note">{STAMP.format(cls="stamp--static")}<span>An empty box means planned. A step gets its X only when the work ships and you can check it.</span></p>
@@ -413,7 +413,7 @@ TOKENOMICS = f'''<main id="main" data-token-api="{'api/token' if CA else ''}">
           <tr><th scope="row">Supply</th><td><span data-supply>Read live from the chain.</span>{SUPPLY_LINK}<span class="pill pill--done">Onchain</span></td></tr>
           <tr><th scope="row">Distribution</th><td>Every holder is public. <span data-holders></span>{HOLDERS_LINK}<span class="pill pill--done">Onchain</span></td></tr>
           <tr><th scope="row">Voting weight</th><td>Weight follows your balance at the round's snapshot. One wallet, one signed choice per round.<span class="pill pill--done">Final</span></td></tr>
-          <tr><th scope="row">Whale cap</th><td>No wallet counts for more than 5% of a round's total vote weight, however much it holds.<span class="pill pill--done">Final</span></td></tr>
+          <tr><th scope="row">Whale cap</th><td>No wallet counts for more than 5% of a round's total vote weight, however much it holds. While fewer than 20 wallets have voted, the limit is an equal share per wallet.<span class="pill pill--done">Final</span></td></tr>
           <tr><th scope="row">Minimum to vote</th><td>Posted with each round's ballot, so spam wallets can be filtered.<span class="pill pill--done">Per round</span></td></tr>
           <tr><th scope="row">Utility</th><td>Voting on what the agent builds next. Nothing else is promised.<span class="pill pill--done">Final</span></td></tr>
           <tr><th scope="row">Buybacks</th><td>30% of creator fees, each buyback linked to its transaction on the dashboard.<span class="pill pill--done">Final</span></td></tr>
@@ -432,7 +432,7 @@ WP_SECTIONS = [
 <ol>
 <li><strong>Snapshot.</strong> When a round opens, holder balances are recorded at a fixed point. Balances after that point do not affect the round.</li>
 <li><strong>Vote.</strong> Each holder signs a plain text message naming the round, their choice, their wallet, a random nonce and a timestamp. No transaction is involved.</li>
-<li><strong>Tally.</strong> Signatures are checked against the snapshot. Weight follows snapshot balance, capped so no wallet counts for more than 5% of the round's total weight. If a wallet signs more than once, its latest valid signature counts. The full list of signatures is published so anyone can recompute the result.</li>
+<li><strong>Tally.</strong> Signatures are checked against the snapshot. Weight follows snapshot balance, capped so no wallet counts for more than 5% of the round's total counted weight. While fewer than 20 wallets have voted, a 5% limit is impossible, so the limit is an equal share (1 divided by the number of voters). If a wallet signs more than once, its latest valid signature counts. The full list of signatures is published so anyone can recompute the result.</li>
 <li><strong>Build and ship.</strong> The agent builds the winning option in public, then the result ships with a write up of what worked, what broke and what it cost.</li>
 </ol>
 <p>Ballot options are proposed in public before each round. The round 1 ballot is posted on X before voting opens.</p>'''),

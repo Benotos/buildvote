@@ -1463,3 +1463,25 @@ a.sb:hover { filter: brightness(1.3); }
 .draft-note--final { border-color: color-mix(in srgb, var(--green) 45%, transparent); background: color-mix(in srgb, var(--green) 8%, transparent); }
 .draft-note--final .stamp { stroke: var(--green); }
 .params td .pill--done { margin-left: .5rem; }
+
+/* ---------- Live voting ---------- */
+.tags li.tag--live { border-color: rgba(61, 220, 151, 0.55); background: rgba(61, 220, 151, 0.1); }
+.tags .tag--live::before { border: 0; border-radius: 50%; background: var(--green); animation: livePing 1.6s ease-out infinite; }
+.ballot.is-live { border-color: rgba(61, 220, 151, 0.45); }
+.ballot.is-live .ballot__title { color: var(--green); }
+.tally { margin-top: 26px; padding: 20px 22px; max-width: 520px; }
+.tally__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.tally__title { margin: 0; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 9px; }
+.tally__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.tally__dot.is-live { background: var(--green); animation: livePing 1.6s ease-out infinite; }
+.tally__meta { color: var(--muted); font-size: 0.85rem; font-family: var(--mono, ui-monospace, monospace); }
+.tally__rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.tally__top { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.tally__top b { color: var(--text); font-weight: 600; }
+.tally__top span { color: var(--text-soft); font-variant-numeric: tabular-nums; }
+.tally__bar { height: 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+.tally__bar i { display: block; height: 100%; border-radius: inherit; background: var(--blue-soft, #b9caff); transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.tally__rows li.is-lead .tally__bar i { background: var(--green); }
+.tally__rows small { color: var(--muted); font-size: 0.78rem; }
+.tally__foot { margin: 16px 0 0; font-size: 0.8rem; color: var(--muted) !important; max-width: none !important; }
+.tally__foot a { color: var(--text-soft); }

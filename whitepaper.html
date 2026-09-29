@@ -86,7 +86,7 @@
 <ol>
 <li><strong>Snapshot.</strong> When a round opens, holder balances are recorded at a fixed point. Balances after that point do not affect the round.</li>
 <li><strong>Vote.</strong> Each holder signs a plain text message naming the round, their choice, their wallet, a random nonce and a timestamp. No transaction is involved.</li>
-<li><strong>Tally.</strong> Signatures are checked against the snapshot. Weight follows snapshot balance, capped so no wallet counts for more than 5% of the round's total weight. If a wallet signs more than once, its latest valid signature counts. The full list of signatures is published so anyone can recompute the result.</li>
+<li><strong>Tally.</strong> Signatures are checked against the snapshot. Weight follows snapshot balance, capped so no wallet counts for more than 5% of the round's total counted weight. While fewer than 20 wallets have voted, a 5% limit is impossible, so the limit is an equal share (1 divided by the number of voters). If a wallet signs more than once, its latest valid signature counts. The full list of signatures is published so anyone can recompute the result.</li>
 <li><strong>Build and ship.</strong> The agent builds the winning option in public, then the result ships with a write up of what worked, what broke and what it cost.</li>
 </ol>
 <p>Ballot options are proposed in public before each round. The round 1 ballot is posted on X before voting opens.</p>

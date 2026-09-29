@@ -140,7 +140,7 @@
     var previewEl = document.getElementById("msg-preview");
     var outEl = document.getElementById("sig-out");
 
-    var state = { wallet: null, pubkey: null, choice: null, nonce: randomHex(8) };
+    var state = { wallet: null, pubkey: null, choice: null, nonce: randomHex(8), round: null, live: false };
 
     form.addEventListener("submit", function (e) { e.preventDefault(); });
 
@@ -153,7 +153,7 @@
       return [
         (document.documentElement.getAttribute("data-brand") || "Build.vote") + " vote",
         "",
-        "Round: 1 (practice round)",
+        "Round: " + (state.live ? String(state.round.number) : "1 (practice round)"),
         "Choice: " + (state.choice || "(none selected)"),
         "Wallet: " + (state.pubkey || "(not connected)"),
         "Nonce: " + state.nonce,
@@ -263,8 +263,17 @@
           var sig = res && res.signature ? res.signature : res;
           if (!sig || typeof sig.length !== "number") throw new Error("The wallet returned no signature.");
           var b58 = base58(new Uint8Array(sig));
-          setOut("");
-          showReceipt({ choice: state.choice, wallet: state.pubkey, sig: b58, at: new Date() });
+          var r = { choice: state.choice, wallet: state.pubkey, sig: b58, at: new Date() };
+          if (!state.live) { setOut(""); showReceipt(r); return; }
+          setOut("Counting your vote…");
+          return fetch("api/vote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ wallet: state.pubkey, message: message, signature: b58 }) })
+            .then(function (x) { return x.json().then(function (j) { return { ok: x.ok, j: j }; }); })
+            .then(function (x) {
+              if (!x.ok || !x.j.ok) throw new Error((x.j && x.j.error) || "The vote was not counted. Try again.");
+              r.counted = true; r.balance = x.j.balance; r.replaced = x.j.replaced;
+              setOut(""); showReceipt(r);
+              if (voting.refresh) voting.refresh();
+            });
         })
         .catch(function (err) {
           var m = (err && err.message) || "Signing was cancelled.";
@@ -279,7 +288,7 @@
       var brand = document.documentElement.getAttribute("data-brand") || "Build.vote";
       var xLink = document.querySelector(".nav__x");
       var handle = xLink ? (xLink.getAttribute("href").split("/").pop() || "") : "";
-      var text = "I just marked " + r.choice + " on the " + brand + " ballot. Holders vote, an AI agent builds it live." + (handle ? " @" + handle : "");
+      var text = "I just " + (r.counted ? "voted " : "marked ") + r.choice + " on the " + brand + " ballot. Holders vote, an AI agent builds it live." + (handle ? " @" + handle : "");
       var share = "https://x.com/intent/post?text=" + encodeURIComponent(text) + (/^https:/.test(location.href) ? "&url=" + encodeURIComponent(location.origin + location.pathname) : "");
       var time = r.at.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 
@@ -290,15 +299,18 @@
       receipt.innerHTML =
         '<div class="receipt__stamp" aria-hidden="true">' +
           '<svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>' +
-          "<span>Signed</span>" +
+          "<span>" + (r.counted ? "Counted" : "Signed") + "</span>" +
         "</div>" +
         '<p class="receipt__title">Your mark: <strong>' + escapeHtml(r.choice) + "</strong></p>" +
         '<dl class="receipt__rows">' +
           "<div><dt>Wallet</dt><dd><code>" + escapeHtml(shortKey(r.wallet)) + "</code></dd></div>" +
           "<div><dt>Signed</dt><dd>" + escapeHtml(time) + "</dd></div>" +
+          (r.counted ? "<div><dt>Weight</dt><dd>" + escapeHtml(Number(r.balance).toLocaleString("en-US", { maximumFractionDigits: 2 })) + " tokens at the snapshot</dd></div>" : "") +
           "<div><dt>Signature</dt><dd><code>" + escapeHtml(r.sig.slice(0, 10) + "…" + r.sig.slice(-6)) + "</code></dd></div>" +
         "</dl>" +
-        '<p class="receipt__note">Practice round. When voting opens at launch, signatures like this one are checked against the snapshot and added to the public tally.</p>' +
+        (r.counted
+          ? '<p class="receipt__note">' + (r.replaced ? "Vote changed. " : "") + "Your vote is in the public tally. You can change it until the round closes; your latest signature counts.</p>"
+          : '<p class="receipt__note">Practice round. When a round opens, signatures like this one are checked against the snapshot and added to the public tally.</p>') +
         '<div class="btn-row">' +
           '<a class="btn btn--primary" href="' + escapeHtml(share) + '" target="_blank" rel="noopener noreferrer">Share on X</a>' +
           '<button type="button" class="btn btn--ghost" data-act="copy">Copy signature</button>' +
@@ -324,6 +336,90 @@
           var first = form.querySelector("input[name='choice']"); if (first) first.focus();
         }
       });
+    }
+
+    /* ---------- Real rounds: /api/vote ---------- */
+    var voting = {};
+    var descs = {};
+    Array.prototype.forEach.call(form.querySelectorAll(".opt"), function (l) {
+      var i = l.querySelector("input"), d = l.querySelector(".opt__desc");
+      if (i && d) descs[i.value] = d.textContent;
+    });
+    var titleEl = document.getElementById("ballot-name"), hintEl = form.querySelector(".ballot__hint");
+    var footEl = form.querySelector(".ballot__foot span"), leadEl = document.getElementById("ballot-lead");
+    var tagEl = document.querySelector("[data-vote-tag]"), ctaEl = document.querySelector("[data-vote-cta]");
+    var intro = document.querySelector(".ballot-intro");
+    var panel = null, lastOpts = "";
+
+    function left(iso) {
+      var ms = Date.parse(iso) - Date.now();
+      if (!(ms > 0)) return "closing";
+      var h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+      return h >= 24 ? Math.floor(h / 24) + "d " + (h % 24) + "h left" : h > 0 ? h + "h " + m + "m left" : m + "m left";
+    }
+    function setOptions(list) {
+      var key = list.join("|");
+      if (key === lastOpts) return;
+      lastOpts = key;
+      var fs = form.querySelector(".ballot__options"), legend = fs.querySelector("legend");
+      fs.innerHTML = "";
+      if (legend) fs.appendChild(legend);
+      list.forEach(function (o) {
+        var l = document.createElement("label");
+        l.className = "opt";
+        l.innerHTML = '<input type="radio" name="choice" value="' + escapeHtml(o) + '"><span class="box" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path class="x x1" pathLength="1" d="M7 8c4.2 4.4 9 9.2 18 17.4"/><path class="x x2" pathLength="1" d="M25 7c-5 5.8-10.2 11-17.2 18.2"/></svg></span>' +
+          '<span class="opt__text"><span class="opt__name">' + escapeHtml(o) + "</span>" + (descs[o] ? '<span class="opt__desc">' + escapeHtml(descs[o]) + "</span>" : "") + "</span>";
+        fs.appendChild(l);
+      });
+    }
+    function drawTally(d) {
+      var r = d.round, t = d.tally;
+      if (!panel) {
+        panel = document.createElement("div");
+        panel.className = "tally card";
+        panel.setAttribute("aria-live", "polite");
+        intro.appendChild(panel);
+      }
+      var top = Math.max.apply(null, t.rows.map(function (x) { return x.pct; }).concat([0]));
+      panel.innerHTML =
+        '<div class="tally__head"><p class="tally__title"><span class="tally__dot' + (r.open ? " is-live" : "") + '"></span>Round ' + r.number + (r.open ? " · live tally" : " · final result") + "</p>" +
+        '<span class="tally__meta">' + t.voters + (t.voters === 1 ? " wallet" : " wallets") + (r.open && r.closes_at ? " · " + left(r.closes_at) : "") + "</span></div>" +
+        '<ol class="tally__rows">' + t.rows.map(function (x) {
+          return '<li class="' + (t.voters && x.pct === top ? "is-lead" : "") + '"><div class="tally__top"><b>' + escapeHtml(x.choice) + "</b><span>" + x.pct.toFixed(1) + "%</span></div>" +
+            '<div class="tally__bar"><i style="width:' + x.pct + '%"></i></div><small>' + x.votes + (x.votes === 1 ? " wallet" : " wallets") + "</small></li>";
+        }).join("") + "</ol>" +
+        '<p class="tally__foot">Snapshot at slot ' + r.snapshot.slot.toLocaleString("en-US") + ", " + r.snapshot.holders.toLocaleString("en-US") + " holders. Weight follows snapshot balance, max " + t.max_share_pct + "% per wallet. " +
+        '<a href="api/vote?full=1" target="_blank" rel="noopener">Every signature</a> · <a href="api/vote?snapshot=1" target="_blank" rel="noopener">Snapshot</a></p>';
+    }
+    function apply(d) {
+      if (!d || !d.configured || !d.round) return;
+      var r = d.round;
+      drawTally(d);
+      if (r.open) {
+        var was = state.live;
+        state.live = true; state.round = r;
+        form.classList.add("is-live");
+        setOptions(r.options);
+        titleEl.textContent = "Round " + r.number + " · voting live";
+        if (hintEl) hintEl.textContent = r.closes_at ? left(r.closes_at) : "Mark one";
+        if (footEl) footEl.textContent = "You sign a plain text message, never a transaction. Weight is your balance at the snapshot. Your latest signature counts until the round closes.";
+        if (leadEl) leadEl.textContent = r.title + " Mark one option, connect your wallet and sign. Your vote goes straight into the public tally.";
+        if (tagEl) { tagEl.classList.add("tag--live"); tagEl.querySelector("span").textContent = "live · round " + r.number; }
+        if (ctaEl) ctaEl.textContent = "Vote now";
+        Array.prototype.forEach.call(document.querySelectorAll("[data-practice-only]"), function (el) { el.hidden = true; });
+        if (!was) render();
+      } else {
+        state.live = false;
+        form.classList.remove("is-live");
+        if (tagEl) { tagEl.classList.remove("tag--live"); tagEl.querySelector("span").textContent = "round " + r.number + " closed"; }
+      }
+    }
+    voting.refresh = function () {
+      return fetch("api/vote", { cache: "no-store" }).then(function (x) { return x.ok ? x.json() : null; }).then(apply).catch(function () {});
+    };
+    if (/^https?:/.test(location.protocol)) {
+      voting.refresh();
+      setInterval(function () { if (!document.hidden) voting.refresh(); }, 20000);
     }
 
     render();
