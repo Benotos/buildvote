@@ -12,8 +12,12 @@ NAME = "Build.vote"        # project name, swapped in everywhere
 HANDLE = "BuildDotVote"    # X handle without @
 CA = ""                    # contract address; leave empty until launch
 BUY_URL = ""               # e.g. the pump.fun page; leave empty until launch
-GITHUB_URL = "https://github.com/Benotos/buildvote"            # public repo; leave empty until it exists
-LIVE_JSON = "live.json"    # data file the live build page reads; a raw GitHub URL also works
+AGENT_REPO = "https://github.com/Benotos/buildvote-agent"            # the AGENT's public repo, e.g. https://github.com/Benotos/buildvote-agent (not the website repo)
+LIVE_JSON = ""             # leave empty: read from the agent repo's status branch. Set a path only to override.
+_m = __import__("re").match(r"https://github\.com/([^/]+)/([^/#?]+)", AGENT_REPO)
+if not LIVE_JSON:
+    LIVE_JSON = f"https://raw.githubusercontent.com/{_m.group(1)}/{_m.group(2)}/status/live.json" if _m else "live.json"
+GITHUB_URL = AGENT_REPO
 # ----------------------------------------------
 
 AC = ' aria-current="page"'
@@ -470,12 +474,38 @@ def readout(key, label, note):
 LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL}">
   <section class="page-head wrap">
     <h1 data-split>Live build</h1>
-    <p class="lead">Where you watch the agent work: what it is building, what it spent and where the fees went. Every number is added up from the rows below, and every row links to its proof.</p>
-    <div class="agent-status" data-state="standby" role="status" aria-live="polite">
-      <span class="dot" aria-hidden="true"></span>
-      <span><b class="agent-status__label">Agent: standby.</b> <span class="agent-status__text">Waiting for the first session. Panels stay empty until there is real data.</span></span>
-      <span class="agent-status__time"></span>
+    <p class="lead">Watch the agent work in real time: every file it reads, every edit, every command, what each session cost and where the fees went. Nothing here is typed by hand.</p>
+
+  </section>
+
+  <section class="wrap console-wrap" aria-labelledby="console-title">
+    <div class="card console" data-state="standby">
+      <div class="console__bar">
+        <span class="console__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <h2 id="console-title" class="console__title">agent@build.vote</h2>
+        <span class="console__meta"><span data-c="session">no session</span><span data-c="clock"></span><span data-c="turns"></span></span>
+        <button type="button" class="console__demo" data-demo-btn>Watch a demo</button>
+      </div>
+      <div class="console__task" role="status" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        <b data-c="state">Standby</b>
+        <span data-c="task">Starts at launch. Creator fees fund the first session.</span>
+        <span class="console__next" data-c="next"></span>
+      </div>
+      <p class="console__badge" data-c="badge" hidden>Demo: simulated session, not real agent activity</p>
+      <ol class="console__feed" id="feed"></ol>
+      <p class="console__empty" data-c="empty">The agent wakes up when creator fees arrive after launch. From then on, every file it reads, every edit and every command appears here as it happens. Press "Watch a demo" to see what that looks like.<span class="console__cursor" aria-hidden="true"></span></p>
     </div>
+    <aside class="card spend" aria-labelledby="spend-title">
+      <div class="panel__head"><h2 id="spend-title">Spend per session</h2><span class="pill" data-c="spendtotal">—</span></div>
+      <div class="spend__bars" id="spendbars" role="img" aria-label="No sessions yet"></div>
+      <p class="empty" data-c="spendempty">Each bar will be one real session, linked to its log.</p>
+      <dl class="spend__stats">
+        <div><dt>Sessions</dt><dd data-c="nsess">0</dd></div>
+        <div><dt>Avg per session</dt><dd data-c="avg">—</dd></div>
+        <div><dt>Daily cap</dt><dd data-c="cap">—</dd></div>
+      </dl>
+    </aside>
   </section>
 
   <section class="wrap" aria-labelledby="readouts-title">
@@ -483,7 +513,7 @@ LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL
     <dl class="readouts">
       {readout("spend", "API spend", "Not live yet")}
       {readout("fees", "Creator fees claimed", "Not live yet")}
-      {readout("commits", "Commits", "Repo opens at launch")}
+      {readout("commits", "Agent commits", "Agent repo not public yet")}
       {readout("holders", "Holders", "Token not launched")}
       {readout("round", "Current round", "Round 1 opens after launch")}
       {readout("payouts", "Contributor payouts", "Not live yet")}
@@ -498,7 +528,7 @@ LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL
       <p class="panel__foot" data-foot="queue" hidden>Proposed ideas are candidates for round 1. Holders pick which one gets built.</p>
     </article>
     <article class="card panel">
-      <header class="panel__head"><h2>Commits</h2><span class="pill" data-count="commits">Waiting for work</span></header>
+      <header class="panel__head"><h2>Agent commits</h2><span class="pill" data-count="commits">Waiting for work</span></header>
       <ol class="feed" id="commits"></ol>
       <p class="empty" data-empty="commits">No commits yet. Each commit will show its message, time and a link to the diff.</p>
     </article>

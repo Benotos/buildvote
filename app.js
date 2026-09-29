@@ -617,7 +617,7 @@
     if (!main) return;
     var jsonUrl = main.getAttribute("data-live-json");
     var repo = (main.getAttribute("data-github") || "").match(/github\.com\/([^\/]+)\/([^\/#?]+)/);
-    var POLL = 60000;
+    var POLL = 20000;
     var last = { json: null, commits: null, commitCount: null };
 
     function $(sel) { return main.querySelector(sel); }
@@ -662,18 +662,163 @@
     }
     function showEmpty(key, show) { var e = $('[data-empty="' + key + '"]'); if (e) e.hidden = !show; }
 
+    /* console */
+    var con = $(".console"), feedEl = $("#feed"), seen = {}, typeQ = [], typing = false, clockTimer = 0;
+    var KIND = { start: "▶", think: "›", read: "read", edit: "edit", run: "$", search: "find", plan: "plan", tool: "tool", done: "✓", error: "!", info: "·" };
+    function c(k) { return con ? con.querySelector('[data-c="' + k + '"]') : null; }
+    function hhmmss(ms) {
+      var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+      return (h ? h + ":" : "") + (h ? ("0" + m).slice(-2) : m) + ":" + ("0" + x).slice(-2);
+    }
+    function clockTick(d) {
+      clearInterval(clockTimer);
+      var a = (d && d.agent) || {}, sch = (d && d.schedule) || {};
+      function tick() {
+        if (a.status === "building" && a.started_at) c("clock").textContent = "⏱ " + hhmmss(Date.now() - Date.parse(a.started_at));
+        else c("clock").textContent = "";
+        var nx = Date.parse(sch.next_run || "");
+        if (a.status !== "building" && nx) {
+          var left = nx - Date.now();
+          c("next").textContent = left > 0 ? "Next session in " + hhmmss(left) : "Next session starting soon";
+        } else c("next").textContent = "";
+      }
+      tick(); clockTimer = setInterval(tick, 1000);
+    }
+    function pump() {
+      if (typing || !typeQ.length) return;
+      typing = true;
+      var job = typeQ.shift(), li = job.li, txt = job.text, i = 0, out = li.querySelector(".f__text");
+      li.hidden = false;
+      if (reduceMotion || document.hidden || typeQ.length > 12) { out.textContent = txt; typing = false; feedEl.scrollTop = feedEl.scrollHeight; pump(); return; }
+      li.classList.add("is-typing");
+      (function step() {
+        i = Math.min(txt.length, i + Math.max(1, Math.round(txt.length / 40)));
+        out.textContent = txt.slice(0, i);
+        feedEl.scrollTop = feedEl.scrollHeight;
+        if (i < txt.length) setTimeout(step, 14);
+        else { li.classList.remove("is-typing"); typing = false; setTimeout(pump, 90); }
+      })();
+    }
+    function renderFeed(feed, animate) {
+      if (!feedEl) return;
+      feed.slice(-80).forEach(function (f) {
+        var key = (f.t || "") + "|" + (f.kind || "") + "|" + (f.text || "");
+        if (seen[key]) return; seen[key] = 1;
+        var li = document.createElement("li");
+        var kind = KIND[f.kind] ? f.kind : "info";
+        li.className = "f f--" + kind;
+        var t = Date.parse(f.t), ts = t ? new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }) : "";
+        li.innerHTML = '<span class="f__t">' + escapeHtml(ts) + '</span><span class="f__k">' + escapeHtml(KIND[kind]) + '</span><span class="f__text"></span>';
+        feedEl.appendChild(li);
+        if (animate) { li.hidden = true; typeQ.push({ li: li, text: String(f.text || "") }); }
+        else li.querySelector(".f__text").textContent = String(f.text || "");
+      });
+      while (feedEl.children.length > 120) feedEl.removeChild(feedEl.firstChild);
+      c("empty").hidden = !!feed.length;
+      feedEl.scrollTop = feedEl.scrollHeight;
+      pump();
+    }
+    var firstRender = true;
+    var demo = false;
     function renderStatus(d) {
-      var box = $(".agent-status"); if (!box) return;
+      if (!con || demo) return;
       var a = (d && d.agent) || {};
       var state = ["building", "idle", "standby", "paused"].indexOf(a.status) > -1 ? a.status : "standby";
-      var stale = d && d.updated_at && (Date.now() - Date.parse(d.updated_at)) > 6 * 3600 * 1000 && state === "building";
-      if (stale) state = "idle";
-      box.setAttribute("data-state", state);
-      var label = { building: "Agent: building.", idle: "Agent: idle.", standby: "Agent: standby.", paused: "Agent: paused." }[state];
-      box.querySelector(".agent-status__label").textContent = label;
-      box.querySelector(".agent-status__text").textContent = a.task ? a.task : (state === "standby" ? "Waiting for the first session. Panels stay empty until there is real data." : "No task right now.");
-      box.querySelector(".agent-status__time").textContent = d && d.updated_at ? "Updated " + ago(d.updated_at) : "";
+      if (state === "building" && d.updated_at && Date.now() - Date.parse(d.updated_at) > 2 * 3600 * 1000) state = "idle";
+      con.setAttribute("data-state", state);
+      c("state").textContent = { building: "Building", idle: "Idle", standby: "Standby", paused: "Paused" }[state];
+      c("task").textContent = a.task || (state === "standby" ? "Starts at launch. Creator fees fund the first session." : "");
+      c("session").textContent = a.session ? "session #" + a.session : "no session";
+      c("turns").textContent = a.turns ? a.turns + " steps" : "";
+      var feed = Array.isArray(d.feed) ? d.feed : [];
+      // on first load replay only the last few lines with typing, the rest instantly
+      if (firstRender) { renderFeed(feed.slice(0, -6), false); renderFeed(feed.slice(-6), true); firstRender = false; }
+      else renderFeed(feed, true);
+      clockTick(d);
+
+      var sessions = Array.isArray(d.sessions) ? d.sessions : [];
+      var sub = d.billing === "subscription";
+      function val(x) { return isNum(x.cost_usd) && x.cost_usd > 0 ? x.cost_usd : (isNum(x.api_value_usd) ? x.api_value_usd : 0); }
+      var bars = $("#spendbars"), costs = sessions.map(val);
+      var st = $("#spend-title"); if (st) st.textContent = sub ? "Usage per session" : "Spend per session";
+      var total = costs.reduce(function (s, v) { return s + v; }, 0), max = Math.max.apply(null, costs.concat([0.0001]));
+      $('[data-c="spendempty"]').hidden = !!sessions.length;
+      $('[data-c="spendtotal"]').textContent = sessions.length ? (sub ? "$0 billed" : "$" + fmtNum(total, 2) + " total") : "—";
+      $('[data-c="nsess"]').textContent = sessions.length;
+      $('[data-c="avg"]').textContent = sessions.length ? "$" + fmtNum(total / sessions.length, 2) + (sub ? " API value" : "") : "—";
+      $('[data-c="cap"]').textContent = sub ? (isNum(d.max_sessions_per_day) ? d.max_sessions_per_day + " sessions / day" : "Subscription")
+        : isNum(d.daily_budget_usd) ? "$" + fmtNum(d.daily_budget_usd, 2) + " / day" : "—";
+      var capdt = $('[data-c="cap"]') && $('[data-c="cap"]').previousElementSibling; if (capdt) capdt.textContent = sub ? "Limit" : "Daily cap";
+      bars.innerHTML = sessions.slice(-24).map(function (x, i) {
+        var h = Math.max(4, val(x) / max * 100);
+        var tip = day(x.date) + " · " + (x.task || "") + " · " + (x.billing === "subscription" ? "$" + fmtNum(val(x), 2) + " API value, covered by subscription" : "$" + fmtNum(x.cost_usd || 0, 2));
+        var u = safeUrl(x.log_url);
+        return (u ? '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer"' : "<span") + ' class="sb" style="--h:' + h.toFixed(1) + '%;--i:' + i + '" title="' + escapeHtml(tip) + '"><span class="sr-only">' + escapeHtml(tip) + "</span>" + (u ? "</a>" : "</span>");
+      }).join("");
+      bars.setAttribute("aria-label", sessions.length ? sessions.length + " sessions, $" + fmtNum(total, 2) + " total" : "No sessions yet");
     }
+
+
+    /* demo session: clearly labeled, never touches real numbers */
+    var DEMO_SCRIPT = [
+      ["start", "Session started: Bundle detector, first working version"],
+      ["think", "Reading my notes from last session before changing anything."],
+      ["read", "PROGRESS.md"], ["read", "TASK.md"],
+      ["plan", "Now: fetch early buyers for a mint from a public RPC"],
+      ["search", "getSignaturesForAddress"],
+      ["read", "bundle-detector/src/rpc.ts"],
+      ["edit", "bundle-detector/src/rpc.ts"],
+      ["think", "Early buyers need their funding source, so I also need the first incoming SOL transfer per wallet."],
+      ["edit", "bundle-detector/src/funding.ts"],
+      ["run", "npm test -- funding"],
+      ["error", "1 test failed: expected 3 clusters, got 4"],
+      ["think", "Two wallets share a funder through an intermediate hop. Grouping should follow one hop."],
+      ["edit", "bundle-detector/src/cluster.ts"],
+      ["run", "npm test"],
+      ["info", "12 passed, 0 failed"],
+      ["edit", "bundle-detector/README.md"],
+      ["edit", "PROGRESS.md"],
+      ["done", "Session finished · 16 steps · demo, no real cost"]
+    ];
+    var demoTimers = [], demoClock = 0;
+    function stopDemoTimers() { demoTimers.forEach(clearTimeout); demoTimers = []; clearInterval(demoClock); }
+    function resetFeed() { feedEl.innerHTML = ""; seen = {}; typeQ = []; typing = false; }
+    function exitDemo() {
+      stopDemoTimers(); demo = false; resetFeed(); firstRender = true;
+      con.removeAttribute("data-demo"); c("badge").hidden = true;
+      demoBtn.textContent = "Watch a demo";
+      renderStatus(last.json || {});
+    }
+    function startDemo() {
+      stopDemoTimers(); clearInterval(clockTimer);
+      demo = true; resetFeed();
+      con.setAttribute("data-demo", ""); con.setAttribute("data-state", "building");
+      c("badge").hidden = false; c("empty").hidden = true;
+      c("state").textContent = "Demo";
+      c("task").textContent = "Bundle detector (sample session)";
+      c("session").textContent = "demo"; c("next").textContent = ""; c("turns").textContent = "";
+      demoBtn.textContent = "Exit demo";
+      var t0 = Date.now(), steps = 0;
+      demoClock = setInterval(function () { c("clock").textContent = "⏱ " + hhmmss(Date.now() - t0); }, 1000);
+      c("clock").textContent = "⏱ 0:00";
+      var delay = 400;
+      DEMO_SCRIPT.forEach(function (row, i) {
+        delay += row[0] === "think" ? 1600 : row[0] === "run" ? 1900 : 900 + (i % 3) * 250;
+        demoTimers.push(setTimeout(function () {
+          if (row[0] !== "think" && row[0] !== "start" && row[0] !== "done" && row[0] !== "info" && row[0] !== "error") steps++;
+          c("turns").textContent = steps ? steps + " steps" : "";
+          renderFeed([{ t: new Date().toISOString(), kind: row[0], text: row[1] }], true);
+          if (i === DEMO_SCRIPT.length - 1) {
+            clearInterval(demoClock);
+            con.setAttribute("data-state", "idle");
+            c("state").textContent = "Demo finished";
+            c("task").textContent = "Real sessions start at launch.";
+          }
+        }, delay));
+      });
+    }
+    var demoBtn = con && con.querySelector("[data-demo-btn]");
+    if (demoBtn) demoBtn.addEventListener("click", function () { if (demo) exitDemo(); else startDemo(); });
 
     function renderJson(d) {
       renderStatus(d);
@@ -682,8 +827,9 @@
       var queue = Array.isArray(d.queue) ? d.queue : [];
 
       var spend = sessions.reduce(function (t, x) { return t + (isNum(x.cost_usd) ? x.cost_usd : 0); }, 0);
+      var subs = d.billing === "subscription";
       setReadout("spend", sessions.length ? spend : null, function (v) { return "$" + fmtNum(v, 2); },
-        sessions.length ? "Across " + sessions.length + " session" + (sessions.length === 1 ? "" : "s") : "Not live yet");
+        sessions.length ? (subs ? "Runs on a Claude subscription, no API bill" : "Across " + sessions.length + " session" + (sessions.length === 1 ? "" : "s")) : "Not live yet");
 
       function sumType(t) { return rows.filter(function (r) { return r.type === t && isNum(r.amount); }).reduce(function (s, r) { return s + r.amount; }, 0); }
       var claims = rows.filter(function (r) { return r.type === "claim"; });
@@ -706,6 +852,7 @@
         return '<li><span class="feed__main">' + escapeHtml(x.title || "Untitled") + '</span><span class="tag tag--' + escapeHtml(x.status || "queued") + '">' + escapeHtml(x.status || "queued") + "</span></li>";
       }).join("");
       showEmpty("queue", !queue.length); setCount("queue", queue.length, "item");
+      var foot = $('[data-foot="queue"]'); if (foot) foot.hidden = !queue.some(function (x) { return x.status === "proposed"; });
 
       if (sessions.length) {
         $("#sessions").innerHTML = sessions.slice().sort(function (a, b) { return Date.parse(b.date) - Date.parse(a.date); }).map(function (x) {
@@ -741,7 +888,7 @@
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (d) { last.json = d; renderJson(d); })
         .catch(function () {
-          var t = $(".agent-status__time"); if (t) t.textContent = last.json ? "Update failed, retrying" : "";
+          /* keep last render; retry on next poll */
         });
     }
     function loadCommits() {
@@ -765,7 +912,7 @@
 
     loadJson(); loadCommits();
     var timers = [];
-    function start() { timers = [setInterval(loadJson, POLL), setInterval(loadCommits, POLL * 3), setInterval(function () { if (last.json) renderStatus(last.json); }, 30000)]; }
+    function start() { timers = [setInterval(loadJson, POLL), setInterval(loadCommits, POLL * 3), setInterval(function () {}, 30000)]; }
     function stop() { timers.forEach(clearInterval); timers = []; }
     start();
     document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else { loadJson(); start(); } });
