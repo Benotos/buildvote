@@ -821,7 +821,29 @@
     var demoBtn = con && con.querySelector("[data-demo-btn]");
     if (demoBtn) demoBtn.addEventListener("click", function () { if (demo) exitDemo(); else startDemo(); });
 
+    var chainUrl = main.getAttribute("data-chain") || "";
+    function withChain(d) {
+      var ch = last.chain;
+      if (!ch || !ch.configured) return d;
+      d = JSON.parse(JSON.stringify(d || {}));
+      if (ch.holders && isNum(ch.holders.count)) d.holders = ch.holders;
+      if (ch.fees && Array.isArray(ch.fees.claims)) {
+        var rows = Array.isArray(d.ledger) ? d.ledger : [], seen = {};
+        rows.forEach(function (r) { if (r.tx) seen[r.tx] = 1; });
+        ch.fees.claims.forEach(function (c) { if (!seen[c.tx]) rows.push(c); });
+        d.ledger = rows;
+      }
+      return d;
+    }
+    function loadChain() {
+      if (!chainUrl) return;
+      fetch(chainUrl, { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (ch) { if (!ch) return; last.chain = ch; renderJson(last.json || {}); })
+        .catch(function () {});
+    }
     function renderJson(d) {
+      d = withChain(d);
       renderStatus(d);
       var sessions = Array.isArray(d.sessions) ? d.sessions : [];
       var rows = Array.isArray(d.ledger) ? d.ledger : [];
@@ -842,7 +864,7 @@
 
       var h = d.holders || {};
       setReadout("holders", isNum(h.count) ? h.count : null, function (v) { return fmtNum(v); },
-        isNum(h.count) ? (safeUrl(h.source) ? link(h.source, "Source") + " · " : "") + ago(h.as_of) : "Token not launched");
+        isNum(h.count) ? (safeUrl(h.source) ? link(h.source, "On Solscan") + " · " : "") + (h.capped ? "50k+ · " : "") + ago(h.as_of) : "Token not launched");
 
       var r = d.round || {};
       setReadout("round", isNum(r.number) ? r.number : null, function (v) { return "#" + fmtNum(v); },
@@ -911,9 +933,9 @@
         .catch(function () { /* rate limited or repo missing: keep last render */ });
     }
 
-    loadJson(); loadCommits();
+    loadJson(); loadCommits(); loadChain();
     var timers = [];
-    function start() { timers = [setInterval(loadJson, POLL), setInterval(loadCommits, POLL * 3), setInterval(function () {}, 30000)]; }
+    function start() { timers = [setInterval(loadJson, POLL), setInterval(loadCommits, POLL * 3), setInterval(loadChain, POLL * 3), setInterval(function () {}, 30000)]; }
     function stop() { timers.forEach(clearInterval); timers = []; }
     start();
     document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else { loadJson(); start(); } });

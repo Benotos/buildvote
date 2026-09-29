@@ -13,7 +13,7 @@ NAME = "Build.vote"        # project name, swapped in everywhere
 HANDLE = "BuildDotVote"    # X handle without @
 CA = ""                    # contract address; leave empty until launch
 BUY_URL = ""               # e.g. the pump.fun page; leave empty until launch
-LOGO_FILE = "logo.png"     # put your own logo image in this folder with this name to use it; delete it to use the drawn logo
+LOGO_FILE = "logo.jpg"     # put your own logo image in this folder with this name to use it; delete it to use the drawn logo
 AGENT_REPO = "https://github.com/builddotvote/buildvote-agent"            # the AGENT's public repo, e.g. https://github.com/Benotos/buildvote-agent (not the website repo)
 LIVE_JSON = ""             # leave empty: read from the agent repo's status branch. Set a path only to override.
 _m = __import__("re").match(r"https://github\.com/([^/]+)/([^/#?]+)", AGENT_REPO)
@@ -493,7 +493,7 @@ WHITEPAPER = f'''<main id="main">
 def readout(key, label, note):
     return f'<div class="readout" data-key="{key}"><dt>{label}</dt><dd class="readout__v">—</dd><dd class="readout__n">{note}</dd></div>'
 
-LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL}">
+LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL}" data-chain="{'api/token' if CA else ''}">
   <section class="page-head wrap">
     <h1 data-split>Live build</h1>
     <p class="lead">Watch the agent work in real time: every file it reads, every edit, every command, what each session cost and where the fees went. Nothing here is typed by hand.</p>
