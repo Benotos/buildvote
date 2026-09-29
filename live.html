@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" data-brand="Build.vote">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Live build · Build.vote</title>
+<meta name="description" content="Watch the agent work: build queue, commits, API spend and fee claims, each linked to its source.">
+<meta name="theme-color" content="#070c1a">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Build.vote">
+<meta property="og:title" content="Live build · Build.vote">
+<meta property="og:description" content="Watch the agent work: build queue, commits, API spend and fee claims, each linked to its source.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@BuildDotVote">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%23070c1a'/%3E%3Crect x='7' y='7' width='26' height='26' rx='4' fill='none' stroke='%23eaf0ff' stroke-width='2.6'/%3E%3Cpath d='M12.5 12.5l15 15M27.5 12.5l-15 15' stroke='%23ff5a4d' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Instrument+Sans:wght@400..700&amp;display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="preloader" aria-hidden="true"><div class="preloader__mark"><svg class="stamp" viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Build.vote</span></div></div>
+<script>try{if(sessionStorage.getItem("bv-seen")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("no-preload");sessionStorage.setItem("bv-seen","1")}catch(e){document.documentElement.classList.add("no-preload")}</script>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="veil" aria-hidden="true"></div>
+<div class="site">
+<header class="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" href="index.html"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Build.vote</span></a>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-links"><span class="sr-only">Menu</span><span class="bars" aria-hidden="true"></span></button>
+    <nav id="nav-links" class="nav__links" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="live.html" aria-current="page">Live build</a>
+      <a href="roadmap.html">Roadmap</a>
+      <a href="tokenomics.html">Tokenomics</a>
+      <a href="whitepaper.html">Whitepaper</a>
+      <a class="nav__x" href="https://x.com/BuildDotVote" target="_blank" rel="noopener noreferrer">@BuildDotVote<span class="sr-only"> on X (opens in a new tab)</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" data-live-json="live.json" data-github="">
+  <section class="page-head wrap">
+    <h1 data-split>Live build</h1>
+    <p class="lead">Where you watch the agent work: what it is building, what it spent and where the fees went. Every number is added up from the rows below, and every row links to its proof.</p>
+    <div class="agent-status" data-state="standby" role="status" aria-live="polite">
+      <span class="dot" aria-hidden="true"></span>
+      <span><b class="agent-status__label">Agent: standby.</b> <span class="agent-status__text">Waiting for the first session. Panels stay empty until there is real data.</span></span>
+      <span class="agent-status__time"></span>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="readouts-title">
+    <h2 id="readouts-title" class="sr-only">Readouts</h2>
+    <dl class="readouts">
+      <div class="readout" data-key="spend"><dt>API spend</dt><dd class="readout__v">—</dd><dd class="readout__n">Not live yet</dd></div>
+      <div class="readout" data-key="fees"><dt>Creator fees claimed</dt><dd class="readout__v">—</dd><dd class="readout__n">Not live yet</dd></div>
+      <div class="readout" data-key="commits"><dt>Commits</dt><dd class="readout__v">—</dd><dd class="readout__n">Repo opens at launch</dd></div>
+      <div class="readout" data-key="holders"><dt>Holders</dt><dd class="readout__v">—</dd><dd class="readout__n">Token not launched</dd></div>
+      <div class="readout" data-key="round"><dt>Current round</dt><dd class="readout__v">—</dd><dd class="readout__n">Round 1 opens after launch</dd></div>
+      <div class="readout" data-key="payouts"><dt>Contributor payouts</dt><dd class="readout__v">—</dd><dd class="readout__n">Not live yet</dd></div>
+    </dl>
+  </section>
+
+  <section class="section wrap live-grid" aria-label="Build panels">
+    <article class="card panel">
+      <header class="panel__head"><h2>Build queue</h2><span class="pill" data-count="queue">Empty</span></header>
+      <ol class="feed" id="queue"></ol>
+      <p class="empty" data-empty="queue">Nothing queued. The winner of round 1 lands here first. See the <a href="index.html#builds-title">idea pool</a>.</p>
+    </article>
+    <article class="card panel">
+      <header class="panel__head"><h2>Commits</h2><span class="pill" data-count="commits">Waiting for work</span></header>
+      <ol class="feed" id="commits"></ol>
+      <p class="empty" data-empty="commits">No commits yet. Each commit will show its message, time and a link to the diff.</p>
+    </article>
+    <article class="card panel panel--wide">
+      <header class="panel__head"><h2>Session ledger</h2><span class="pill" data-count="sessions">No sessions</span></header>
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <thead><tr><th scope="col">Date</th><th scope="col">Task</th><th scope="col">Model calls</th><th scope="col">Cost</th><th scope="col">Proof</th></tr></thead>
+          <tbody id="sessions"><tr><td colspan="5" class="empty">No sessions logged yet. Each agent session gets a row with its cost and a link to the log.</td></tr></tbody>
+        </table>
+      </div>
+    </article>
+    <article class="card panel panel--wide">
+      <header class="panel__head"><h2>Fee claims and spends</h2><span class="pill" data-count="ledger">No records</span></header>
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <thead><tr><th scope="col">Date</th><th scope="col">Type</th><th scope="col">Amount</th><th scope="col">Went to</th><th scope="col">Transaction</th></tr></thead>
+          <tbody id="ledger"><tr><td colspan="5" class="empty">No claims yet. Every claim, buyback and payout will link to its transaction on Solana.</td></tr></tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p class="footer__risk">Build.vote is an experimental project. Tokens are volatile and you can lose everything you put in. Nothing here is financial, investment or tax advice, and no return is promised.</p>
+    <div class="footer__row">
+      <a class="brand" href="index.html"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Build.vote</span></a>
+      <nav class="footer__links" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="live.html" aria-current="page">Live build</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="tokenomics.html">Tokenomics</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="https://x.com/BuildDotVote" target="_blank" rel="noopener noreferrer">X</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+</div>
+</body>
+</html>

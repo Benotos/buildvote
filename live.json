@@ -1,0 +1,9 @@
+{
+  "updated_at": null,
+  "agent": { "status": "standby", "task": "" },
+  "round": { "number": null, "status": "", "title": "" },
+  "holders": { "count": null, "as_of": null, "source": "" },
+  "queue": [],
+  "sessions": [],
+  "ledger": []
+}
