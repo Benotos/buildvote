@@ -5,19 +5,25 @@ STAMP = '<svg class="stamp {cls}" viewBox="0 0 40 40" aria-hidden="true" focusab
 CHECK = '<svg class="stamp stamp--check" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>'
 BOX_X = '<svg viewBox="0 0 32 32" focusable="false"><path class="x x1" pathLength="1" d="M7 8c4.2 4.4 9 9.2 18 17.4"/><path class="x x2" pathLength="1" d="M25 7c-5 5.8-10.2 11-17.2 18.2"/></svg>'
 
-FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%23070c1a'/%3E%3Crect x='7' y='7' width='26' height='26' rx='4' fill='none' stroke='%23eaf0ff' stroke-width='2.6'/%3E%3Cpath d='M12.5 12.5l15 15M27.5 12.5l-15 15' stroke='%23ff5a4d' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E"
+LOGO_B = '<svg class="logo-b" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="10.4" y="10.4" width="19.2" height="19.2" rx="2.8" fill="none" stroke="#eaf0ff" stroke-width="2.1"/><g transform="rotate(-7 20 20)" fill="none" stroke="#ff5a4d" stroke-linecap="round"><path d="M9.2 9.6C15 15 23 23.2 31.8 31.6" stroke-width="4.4"/><path d="M31.8 9.2C25 15 17.6 22.8 8.8 31.8" stroke-width="4"/></g></svg>'
+FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%23070c1a'/%3E%3Crect x='10.4' y='10.4' width='19.2' height='19.2' rx='2.8' fill='none' stroke='%23eaf0ff' stroke-width='2.4'/%3E%3Cg transform='rotate%28-7 20 20%29' fill='none' stroke='%23ff5a4d' stroke-linecap='round'%3E%3Cpath d='M8.6 9C15 15 23 23.2 32.2 32' stroke-width='4.8'/%3E%3Cpath d='M32.2 8.6C25 15 17.6 22.8 8.4 32.2' stroke-width='4.4'/%3E%3C/g%3E%3C/svg%3E"
 
 # ---- Edit these, then run: python3 gen.py ----
 NAME = "Build.vote"        # project name, swapped in everywhere
 HANDLE = "BuildDotVote"    # X handle without @
 CA = ""                    # contract address; leave empty until launch
 BUY_URL = ""               # e.g. the pump.fun page; leave empty until launch
+LOGO_FILE = "logo.png"     # put your own logo image in this folder with this name to use it; delete it to use the drawn logo
 AGENT_REPO = "https://github.com/builddotvote/buildvote-agent"            # the AGENT's public repo, e.g. https://github.com/Benotos/buildvote-agent (not the website repo)
 LIVE_JSON = ""             # leave empty: read from the agent repo's status branch. Set a path only to override.
 _m = __import__("re").match(r"https://github\.com/([^/]+)/([^/#?]+)", AGENT_REPO)
 if not LIVE_JSON:
     LIVE_JSON = f"https://raw.githubusercontent.com/{_m.group(1)}/{_m.group(2)}/status/live.json" if _m else "live.json"
 GITHUB_URL = AGENT_REPO
+if os.path.exists(os.path.join(OUT, LOGO_FILE)):
+    BRAND_MARK = f'<img class="logo-img" src="{LOGO_FILE}" alt="" width="30" height="30">'
+else:
+    BRAND_MARK = LOGO_B
 # ----------------------------------------------
 
 AC = ' aria-current="page"'
@@ -26,6 +32,7 @@ PAGES = [("index.html", "Home"), ("live.html", "Live build"), ("roadmap.html", "
 RISK = "Build.vote is an experimental project. Tokens are volatile and you can lose everything you put in. Nothing here is financial, investment or tax advice, and no return is promised."
 
 def head(title, desc):
+    ICON_TAG = f'<link rel="icon" type="image/png" href="{LOGO_FILE}">\n<link rel="apple-touch-icon" href="{LOGO_FILE}">' if os.path.exists(os.path.join(OUT, LOGO_FILE)) else f'<link rel="icon" type="image/svg+xml" href="{FAVICON}">'
     return f'''<!doctype html>
 <html lang="en" data-brand="Build.vote">
 <head>
@@ -40,7 +47,7 @@ def head(title, desc):
 <meta property="og:description" content="{desc}">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@BuildDotVote">
-<link rel="icon" type="image/svg+xml" href="{FAVICON}">
+{ICON_TAG}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Instrument+Sans:wght@400..700&amp;display=swap">
@@ -62,7 +69,7 @@ def nav(current):
     BODYCLS = 'page-home' if current == 'index.html' else ''
     return f'''<body class="{BODYCLS}">
 <a class="skip" href="#main">Skip to content</a>
-<div class="preloader" aria-hidden="true"><div class="preloader__mark"><svg class="stamp" viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Build.vote</span></div></div>
+<div class="preloader" aria-hidden="true"><div class="preloader__mark">{BRAND_MARK}<span>Build.vote</span></div></div>
 <script>try{{if(sessionStorage.getItem("bv-seen")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("no-preload");sessionStorage.setItem("bv-seen","1")}}catch(e){{document.documentElement.classList.add("no-preload")}}</script>
 <canvas id="scene" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
@@ -70,7 +77,7 @@ def nav(current):
 <div class="site">
 <header class="nav">
   <div class="wrap nav__inner">
-    <a class="brand" href="index.html">{STAMP.format(cls="stamp--static")}<span>Build.vote</span></a>
+    <a class="brand" href="index.html">{BRAND_MARK}<span>Build.vote</span></a>
     <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-links"><span class="sr-only">Menu</span><span class="bars" aria-hidden="true"></span></button>
     <nav id="nav-links" class="nav__links" aria-label="Main">
 {links}
@@ -90,7 +97,7 @@ def footer(current):
   <div class="wrap">
     <p class="footer__risk">{RISK}</p>
     <div class="footer__row">
-      <a class="brand" href="index.html">{STAMP.format(cls="stamp--static")}<span>Build.vote</span></a>
+      <a class="brand" href="index.html">{BRAND_MARK}<span>Build.vote</span></a>
       <nav class="footer__links" aria-label="Footer">
 {links}
         <a href="https://x.com/BuildDotVote" target="_blank" rel="noopener noreferrer">X</a>{GH_FOOT}
