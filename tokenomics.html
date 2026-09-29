@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tokenomics · Build.vote</title>
-<meta name="description" content="Draft creator fee split and token parameters for Build.vote, finalized before launch.">
+<meta name="description" content="Creator fee split and token parameters for Build.vote.">
 <meta name="theme-color" content="#070c1a">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Build.vote">
 <meta property="og:title" content="Tokenomics · Build.vote">
-<meta property="og:description" content="Draft creator fee split and token parameters for Build.vote, finalized before launch.">
+<meta property="og:description" content="Creator fee split and token parameters for Build.vote.">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@BuildDotVote">
 <link rel="icon" type="image/png" href="logo.jpg">
@@ -51,20 +51,20 @@
   </div>
 </header>
 
-<main id="main">
+<main id="main" data-token-api="">
   <section class="page-head wrap">
     <h1 data-split>Tokenomics</h1>
     <p class="lead">Where creator fees go and how voting weight works.</p>
-    <div class="draft-note" role="note"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><p><strong>Draft v0.1.</strong> Final numbers are locked and linked here at launch.</p></div>
+    <div class="draft-note draft-note--final" role="note"><svg class="stamp stamp--check" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg><p><strong>v1.0 · Final.</strong> Any future change is announced on X first, with the reason.</p></div>
   </section>
 
   <section class="wrap" aria-labelledby="fees-title">
     <div class="card fee-card" data-tilt="3">
       <div class="fee-card__top">
-        <h2 id="fees-title">Draft creator fee split</h2>
-        <span class="pill pill--draft">Draft</span>
+        <h2 id="fees-title">Creator fee split</h2>
+        <span class="pill pill--done">Final</span>
       </div>
-      <div class="feebar" role="img" aria-label="Draft split: API costs 40 percent, buybacks 30 percent, contributor rewards 20 percent, reserve 10 percent.">
+      <div class="feebar" role="img" aria-label="Split: API costs 40 percent, buybacks 30 percent, contributor rewards 20 percent, reserve 10 percent.">
         <span class="feebar__seg seg-api" style="flex:40">40%</span>
         <span class="feebar__seg seg-buy" style="flex:30">30%</span>
         <span class="feebar__seg seg-bounty" style="flex:20">20%</span>
@@ -83,15 +83,15 @@
     <div class="card table-card">
       <table class="params">
         <caption>Parameters</caption>
-        <thead><tr><th scope="col">Parameter</th><th scope="col">Draft position</th></tr></thead>
+        <thead><tr><th scope="col">Parameter</th><th scope="col">Rule</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Supply</th><td>Not set yet. Published before launch.<span class="pill pill--draft">Open</span></td></tr>
-          <tr><th scope="row">Distribution</th><td>Not set yet. Any team or reserve allocation will be stated with its wallet address before launch.<span class="pill pill--draft">Open</span></td></tr>
-          <tr><th scope="row">Voting weight</th><td>Draft: weight follows your balance at the round's snapshot. One wallet, one signed choice per round.<span class="pill pill--draft">Draft</span></td></tr>
-          <tr><th scope="row">Whale cap</th><td>Draft: no wallet counts for more than 5% of a round's total vote weight, however much it holds.<span class="pill pill--draft">Draft</span></td></tr>
-          <tr><th scope="row">Minimum to vote</th><td>To be decided. A small minimum may be set to limit spam wallets.<span class="pill pill--draft">Open</span></td></tr>
-          <tr><th scope="row">Utility</th><td>Voting on what the agent builds next. Nothing else is promised.<span class="pill pill--draft">Draft</span></td></tr>
-          <tr><th scope="row">Buybacks</th><td>Draft: 30% of creator fees, each buyback linked to its transaction on the dashboard. What happens to bought tokens is decided before launch.<span class="pill pill--draft">Draft</span></td></tr>
+          <tr><th scope="row">Supply</th><td><span data-supply>Read live from the chain.</span><span class="pill pill--done">Onchain</span></td></tr>
+          <tr><th scope="row">Distribution</th><td>Every holder is public. <span data-holders></span><span class="pill pill--done">Onchain</span></td></tr>
+          <tr><th scope="row">Voting weight</th><td>Weight follows your balance at the round's snapshot. One wallet, one signed choice per round.<span class="pill pill--done">Final</span></td></tr>
+          <tr><th scope="row">Whale cap</th><td>No wallet counts for more than 5% of a round's total vote weight, however much it holds.<span class="pill pill--done">Final</span></td></tr>
+          <tr><th scope="row">Minimum to vote</th><td>Posted with each round's ballot, so spam wallets can be filtered.<span class="pill pill--done">Per round</span></td></tr>
+          <tr><th scope="row">Utility</th><td>Voting on what the agent builds next. Nothing else is promised.<span class="pill pill--done">Final</span></td></tr>
+          <tr><th scope="row">Buybacks</th><td>30% of creator fees, each buyback linked to its transaction on the dashboard.<span class="pill pill--done">Final</span></td></tr>
         </tbody>
       </table>
     </div>

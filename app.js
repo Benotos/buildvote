@@ -984,6 +984,19 @@
     setInterval(load, 30000); setInterval(commits, 180000);
   }
 
+  /* ---------- Tokenomics: supply and holders from chain ---------- */
+  function initTokenStats() {
+    var main = document.querySelector("[data-token-api]");
+    var api = main && main.getAttribute("data-token-api");
+    if (!api) return;
+    fetch(api, { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d || !d.configured) return;
+      var sup = document.querySelector("[data-supply]"), hol = document.querySelector("[data-holders]");
+      if (sup && d.supply && d.supply.amount) sup.textContent = Number(d.supply.amount).toLocaleString("en-US") + " tokens.";
+      if (hol && d.holders && typeof d.holders.count === "number") hol.textContent = d.holders.count.toLocaleString("en-US") + " holders right now.";
+    }).catch(function () {});
+  }
+
   /* ---------- Copy contract address ---------- */
   function initCopy() {
     var btn = document.querySelector(".ca__copy");
@@ -1005,6 +1018,7 @@
   function init() {
     initCopy();
     initHomeLive();
+    initTokenStats();
     initLive();
     initMotion();
     initSpotlight();

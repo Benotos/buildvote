@@ -139,11 +139,11 @@ BUILD_ITEMS = "\n".join(f'      <li><span class="builds__n">{i+1:02d}</span><div
 GH_LINE = (f'Submit work on <a href="{GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>.' if GITHUB_URL
            else 'The public repo link gets posted here and on X when it opens.')
 FAQ_ITEMS = [
-  ("Is the token live?", "Not yet. The contract address appears on this site and on X at launch. Anything posted anywhere else is not us."),
+  ("Is the token live?", "Yes. The only official contract address is the one on this site and pinned on @BuildDotVote. Anything posted anywhere else is not us."),
   ("What does the agent build?", "Real Solana products: a live rug radar, a smart money tracker, a treasury the agent runs itself and more. Holders vote on the order."),
   ("How does voting work?", "When a round opens, balances are snapshotted. You sign a message naming your choice. Weight follows balance up to a cap, and the full list of signatures is published so anyone can recount."),
-  ("Can whales take over a vote?", "Each wallet's weight is capped at a set share of the round's total vote. The draft cap is 5%. A cap does not stop someone splitting tokens across wallets, so we publish every signature for anyone to check."),
-  ("Where do creator fees go?", "API costs, buybacks, contributor rewards and a reserve. The draft split is on the tokenomics page. Every claim and spend links to its record."),
+  ("Can whales take over a vote?", "Each wallet's weight is capped at a set share of the round's total vote. The cap is 5%. A cap does not stop someone splitting tokens across wallets, so we publish every signature for anyone to check."),
+  ("Where do creator fees go?", "API costs, buybacks, contributor rewards and a reserve. The split is on the tokenomics page. Every claim and spend links to its record."),
   ("Will you ever ask me to sign a transaction to vote?", "No. Voting is a signed message only. If something asks for a transaction, an approval or your seed phrase, it is a scam."),
 ]
 FAQ = """
@@ -183,13 +183,13 @@ def flow_svg():
         h=H*p/100; ys=y+h/2; y+=h; w=h*0.9; nh=max(w,48); yd=cur+nh/2; cur+=nh+22
         d=f"M200 {ys:.1f} C 470 {ys:.1f}, 500 {yd:.1f}, 744 {yd:.1f}"
         parts.append(f'<path class="flow__band" d="{d}" stroke="{c}" stroke-width="{w:.1f}"/><path class="flow__pulse" style="--d:{i*0.35}s" d="{d}" stroke="{c}"/>')
-        parts.append(f'<g class="flow__node" style="--d:{0.2+i*0.1}s"><rect x="744" y="{yd-nh/2:.1f}" width="250" height="{nh:.1f}" rx="10" stroke="{c}"/><text x="764" y="{yd-3:.1f}" class="flow__name">{n}</text><text x="764" y="{yd+17:.1f}" class="flow__pct">{p}% draft</text></g>')
+        parts.append(f'<g class="flow__node" style="--d:{0.2+i*0.1}s"><rect x="744" y="{yd-nh/2:.1f}" width="250" height="{nh:.1f}" rx="10" stroke="{c}"/><text x="764" y="{yd-3:.1f}" class="flow__name">{n}</text><text x="764" y="{yd+17:.1f}" class="flow__pct">{p}%</text></g>')
     src=f'<g class="flow__src"><rect x="20" y="{top}" width="180" height="{H}" rx="14"/><text x="42" y="{top+H/2-6}" class="flow__name">Creator fees</text><text x="42" y="{top+H/2+16}" class="flow__pct">from token trades</text></g>'
-    return f'<svg class="flow__svg" viewBox="0 0 1000 400" role="img" aria-label="Draft split of creator fees: API costs 40 percent, buybacks 30 percent, contributor rewards 20 percent, reserve 10 percent.">'+"".join(parts)+src+'</svg>'
+    return f'<svg class="flow__svg" viewBox="0 0 1000 400" role="img" aria-label="Split of creator fees: API costs 40 percent, buybacks 30 percent, contributor rewards 20 percent, reserve 10 percent.">'+"".join(parts)+src+'</svg>'
 FLOW = f"""  <section class="section wrap flow" aria-labelledby="flow-title">
     <div class="section__head">
       <h2 id="flow-title" data-split>Where the fees go</h2>
-      <p>Creator fees fund the work. This is the draft split, finalized and published before launch. Every claim and spend shows up on the <a href="live.html">live build</a> page with its transaction.</p>
+      <p>Creator fees fund the work. The split is fixed and public. Every claim and spend shows up on the <a href="live.html">live build</a> page with its transaction.</p>
     </div>
     <div class="card flow__card" data-spot>
       {flow_svg()}
@@ -207,7 +207,7 @@ INDEX = f'''<main id="main">
     <ul class="tags" aria-label="Project status">
       <li class="tag--agent" data-agent-tag><b>Agent:</b> <span>connecting</span></li>
       <li><b>Token:</b> {"live" if CA else "launching soon"}</li>
-      <li><b>Voting:</b> opens at launch</li>
+      <li><b>Voting:</b> round 1 soon</li>
     </ul>
     <div class="ca" role="group" aria-label="Contract address">
       <span class="ca__label">CA</span>
@@ -236,7 +236,7 @@ INDEX = f'''<main id="main">
   <section class="section wrap ballot-section" aria-labelledby="ballot-title">
     <div class="ballot-intro">
       <h2 id="ballot-title" data-split>Mark the ballot</h2>
-      <p>This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now, and your mark counts for real once voting opens at launch.</p>
+      <p>This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now. Real votes are cast when round 1 opens.</p>
       <p>Signing proves you control the wallet. It moves nothing, costs nothing and approves nothing.</p>
       <p class="muted small">The final round 1 ballot is posted on X before voting opens.</p>
     </div>
@@ -264,7 +264,7 @@ INDEX = f'''<main id="main">
         </details>
         <p id="sig-out" class="sig-out" role="status" aria-live="polite"></p>
       </div>
-      <p id="ballot-disclaimer" class="ballot__foot">{STAMP.format(cls="stamp--static")}<span>Practice round: you sign a plain text message, never a transaction. Votes start counting when voting opens at launch.</span></p>
+      <p id="ballot-disclaimer" class="ballot__foot">{STAMP.format(cls="stamp--static")}<span>Practice round: you sign a plain text message, never a transaction. Votes start counting when round 1 opens.</span></p>
     </form>
   </section>
 
@@ -307,7 +307,7 @@ INDEX = f'''<main id="main">
     </div>
     <ul class="card rules">
 {rule("Real data only", "The dashboard shows onchain records and real logs. If a number does not exist yet, we say so instead of guessing.")}
-{rule("Public fee rules", "The creator fee split is published before launch. Every claim and every spend links to its record so you can check it.")}
+{rule("Public fee rules", "The creator fee split is fixed and public. Every claim and every spend links to its record so you can check it.")}
 {rule("Honest posting", "Posts describe what shipped and what did not. No price talk, no promises of returns.")}
 {rule("Signatures only", "Voting asks you to sign a message. We will never ask for a transaction or a token approval to vote.")}
     </ul>
@@ -324,7 +324,7 @@ INDEX = f'''<main id="main">
       <div class="card contrib__item" data-tilt="4"><h3>Bug reports</h3><p>Show how to reproduce a bug. Confirmed reports earn more than plain issues.</p></div>
       <div class="card contrib__item" data-tilt="4"><h3>Pull requests</h3><p>Fix it yourself. Merged pull requests earn the biggest share.</p></div>
     </div>
-    <p class="muted small contrib__note">{GH_LINE} Reward sizes are set in the final fee rules, published before launch.</p>
+    <p class="muted small contrib__note">{GH_LINE} Reward sizes are posted with each accepted contribution.</p>
   </section>
 {FAQ}
   <section class="bigcta" aria-labelledby="follow-title">
@@ -333,7 +333,7 @@ INDEX = f'''<main id="main">
       <div class="cta">
         <div>
           <h2 id="follow-title">Follow the build</h2>
-          <p>Launch details, the fee split and the first ballot get posted on X first.</p>
+          <p>Round 1, every ballot and every update get posted on X first.</p>
         </div>
         <a class="btn btn--primary" href="https://x.com/BuildDotVote" target="_blank" rel="noopener noreferrer">Follow @BuildDotVote<span class="sr-only"> (opens in a new tab)</span></a>
       </div>
@@ -359,13 +359,13 @@ def tl(n, title, status, text, done, live=False):
 ROADMAP = f'''<main id="main">
   <section class="page-head wrap">
     <h1 data-split>Roadmap</h1>
-    <p class="lead">What ships, in order. Foundations is done and the agent is already building in public. Dates are added as they are locked in.</p>
+    <p class="lead">What ships, in order. Foundations and launch are done, and the agent is building in public. Dates are added as they are locked in.</p>
   </section>
   <section class="wrap" aria-label="Roadmap steps">
     <ol class="timeline">
 {tl(1, "Foundations", "done", "This site, the whitepaper, the fee rules and the agent's working setup: a public repo, hard usage limits and full logging. The agent is already building in public.", "the site is live, the whitepaper is public and the agent can run end to end on a test task.")}
-{tl(2, "Launch", "next", "The token goes live. Final supply, distribution and the fee split are published before launch, not after.", "the token exists and the final parameters are posted and linked from this site.")}
-{tl(3, "Voting backend", "", "Balance snapshots, signed message checks and a public tally that anyone can recompute from the raw signatures.", "a test round runs with real signatures and the tally can be reproduced by someone outside the team.")}
+{tl(2, "Launch", "done", "The token is live. Supply, holders and the fee split are public and linked from this site.", "the token exists and the final parameters are posted and linked from this site.")}
+{tl(3, "Voting backend", "next", "Balance snapshots, signed message checks and a public tally that anyone can recompute from the raw signatures.", "a test round runs with real signatures and the tally can be reproduced by someone outside the team.")}
 {tl(4, "Live dashboard", "live", "One page for commits, API spend and creator fee claims, each linked to its source record.", "every number on the dashboard links to a commit, an invoice log or a transaction.")}
 {tl(5, "Round 1", "", "The first real ballot. Holders vote, the agent builds the winner in public and ships it.", "the winning tool is live and its build log and costs are public.")}
 {tl(6, "Ongoing rounds", "", "Regular rounds, with the rules adjusted in public as we learn what works.", "this never finishes by design. Each round gets its own write up.")}
@@ -374,20 +374,22 @@ ROADMAP = f'''<main id="main">
   </section>
 </main>'''
 
-TOKENOMICS = f'''<main id="main">
+SUPPLY_LINK = f' <a href="https://solscan.io/token/{CA}" target="_blank" rel="noopener noreferrer">Check on Solscan</a>' if CA else ''
+HOLDERS_LINK = f' <a href="https://solscan.io/token/{CA}#holders" target="_blank" rel="noopener noreferrer">See every wallet on Solscan</a>' if CA else ''
+TOKENOMICS = f'''<main id="main" data-token-api="{'api/token' if CA else ''}">
   <section class="page-head wrap">
     <h1 data-split>Tokenomics</h1>
     <p class="lead">Where creator fees go and how voting weight works.</p>
-    <div class="draft-note" role="note">{STAMP.format(cls="stamp--static")}<p><strong>Draft v0.1.</strong> Final numbers are locked and linked here at launch.</p></div>
+    <div class="draft-note draft-note--final" role="note">{CHECK}<p><strong>v1.0 · Final.</strong> Any future change is announced on X first, with the reason.</p></div>
   </section>
 
   <section class="wrap" aria-labelledby="fees-title">
     <div class="card fee-card" data-tilt="3">
       <div class="fee-card__top">
-        <h2 id="fees-title">Draft creator fee split</h2>
-        <span class="pill pill--draft">Draft</span>
+        <h2 id="fees-title">Creator fee split</h2>
+        <span class="pill pill--done">Final</span>
       </div>
-      <div class="feebar" role="img" aria-label="Draft split: API costs 40 percent, buybacks 30 percent, contributor rewards 20 percent, reserve 10 percent.">
+      <div class="feebar" role="img" aria-label="Split: API costs 40 percent, buybacks 30 percent, contributor rewards 20 percent, reserve 10 percent.">
         <span class="feebar__seg seg-api" style="flex:40">40%</span>
         <span class="feebar__seg seg-buy" style="flex:30">30%</span>
         <span class="feebar__seg seg-bounty" style="flex:20">20%</span>
@@ -406,15 +408,15 @@ TOKENOMICS = f'''<main id="main">
     <div class="card table-card">
       <table class="params">
         <caption>Parameters</caption>
-        <thead><tr><th scope="col">Parameter</th><th scope="col">Draft position</th></tr></thead>
+        <thead><tr><th scope="col">Parameter</th><th scope="col">Rule</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Supply</th><td>Not set yet. Published before launch.<span class="pill pill--draft">Open</span></td></tr>
-          <tr><th scope="row">Distribution</th><td>Not set yet. Any team or reserve allocation will be stated with its wallet address before launch.<span class="pill pill--draft">Open</span></td></tr>
-          <tr><th scope="row">Voting weight</th><td>Draft: weight follows your balance at the round's snapshot. One wallet, one signed choice per round.<span class="pill pill--draft">Draft</span></td></tr>
-          <tr><th scope="row">Whale cap</th><td>Draft: no wallet counts for more than 5% of a round's total vote weight, however much it holds.<span class="pill pill--draft">Draft</span></td></tr>
-          <tr><th scope="row">Minimum to vote</th><td>To be decided. A small minimum may be set to limit spam wallets.<span class="pill pill--draft">Open</span></td></tr>
-          <tr><th scope="row">Utility</th><td>Voting on what the agent builds next. Nothing else is promised.<span class="pill pill--draft">Draft</span></td></tr>
-          <tr><th scope="row">Buybacks</th><td>Draft: 30% of creator fees, each buyback linked to its transaction on the dashboard. What happens to bought tokens is decided before launch.<span class="pill pill--draft">Draft</span></td></tr>
+          <tr><th scope="row">Supply</th><td><span data-supply>Read live from the chain.</span>{SUPPLY_LINK}<span class="pill pill--done">Onchain</span></td></tr>
+          <tr><th scope="row">Distribution</th><td>Every holder is public. <span data-holders></span>{HOLDERS_LINK}<span class="pill pill--done">Onchain</span></td></tr>
+          <tr><th scope="row">Voting weight</th><td>Weight follows your balance at the round's snapshot. One wallet, one signed choice per round.<span class="pill pill--done">Final</span></td></tr>
+          <tr><th scope="row">Whale cap</th><td>No wallet counts for more than 5% of a round's total vote weight, however much it holds.<span class="pill pill--done">Final</span></td></tr>
+          <tr><th scope="row">Minimum to vote</th><td>Posted with each round's ballot, so spam wallets can be filtered.<span class="pill pill--done">Per round</span></td></tr>
+          <tr><th scope="row">Utility</th><td>Voting on what the agent builds next. Nothing else is promised.<span class="pill pill--done">Final</span></td></tr>
+          <tr><th scope="row">Buybacks</th><td>30% of creator fees, each buyback linked to its transaction on the dashboard.<span class="pill pill--done">Final</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -430,11 +432,11 @@ WP_SECTIONS = [
 <ol>
 <li><strong>Snapshot.</strong> When a round opens, holder balances are recorded at a fixed point. Balances after that point do not affect the round.</li>
 <li><strong>Vote.</strong> Each holder signs a plain text message naming the round, their choice, their wallet, a random nonce and a timestamp. No transaction is involved.</li>
-<li><strong>Tally.</strong> Signatures are checked against the snapshot. Draft rule: weight follows snapshot balance, capped so no wallet counts for more than 5% of the round's total weight. If a wallet signs more than once, its latest valid signature counts. The full list of signatures is published so anyone can recompute the result.</li>
+<li><strong>Tally.</strong> Signatures are checked against the snapshot. Weight follows snapshot balance, capped so no wallet counts for more than 5% of the round's total weight. If a wallet signs more than once, its latest valid signature counts. The full list of signatures is published so anyone can recompute the result.</li>
 <li><strong>Build and ship.</strong> The agent builds the winning option in public, then the result ships with a write up of what worked, what broke and what it cost.</li>
 </ol>
-<p>Ballot options are proposed in public before each round. The first ballot is not final; the options on the home page are a draft.</p>'''),
-("fees", "Fees", '''<p>The work is funded by creator fees earned when the token trades. Draft split, to be finalized before launch:</p>
+<p>Ballot options are proposed in public before each round. The round 1 ballot is posted on X before voting opens.</p>'''),
+("fees", "Fees", '''<p>The work is funded by creator fees earned when the token trades. The split:</p>
 <table class="params">
 <thead><tr><th scope="col">Use</th><th scope="col">Share</th></tr></thead>
 <tbody>
@@ -444,14 +446,14 @@ WP_SECTIONS = [
 <tr><th scope="row">Reserve</th><td>10%</td></tr>
 </tbody>
 </table>
-<p>The final split is published before launch. Any later change is announced in advance with the reason. Every fee claim and every spend links to its record on the dashboard. If fees do not cover API costs, the agent does less work; it does not borrow against the future.</p>'''),
-("contributors", "Contributor rewards", '''<p>The agent is not the only one building. A share of creator fees (draft: 20%) pays people who improve its work.</p>
+<p>Any change to the split is announced in advance with the reason. Every fee claim and every spend links to its record on the dashboard. If fees do not cover API costs, the agent does less work; it does not borrow against the future.</p>'''),
+("contributors", "Contributor rewards", '''<p>The agent is not the only one building. A share of creator fees (20%) pays people who improve its work.</p>
 <ul>
 <li><strong>Issues.</strong> Accepted issues that point out something missing or broken.</li>
 <li><strong>Bug reports.</strong> Confirmed bugs with steps to reproduce.</li>
 <li><strong>Pull requests.</strong> Merged fixes and features.</li>
 </ul>
-<p>Only accepted work is paid. Reward sizes are set in the final fee rules before launch, and each payout links to its transaction on the dashboard.</p>'''),
+<p>Only accepted work is paid. Each payout links to its transaction on the dashboard.</p>'''),
 ("agent", "The agent", '''<p>The agent is an AI coding agent with a hard API budget per round. It builds crypto tools on Solana, such as wallet analytics, launch checks and payment tools. It works in a public repository, so every commit is visible as it happens.</p>
 <ul>
 <li>It does not hold the keys to fee funds and cannot move them.</li>
@@ -474,7 +476,7 @@ WP_SECTIONS = [
 <li>Rules about tokens differ by country and can change. You are responsible for what applies to you.</li>
 <li>The project is an experiment and may stop.</li>
 </ul>'''),
-("disclaimer", "Disclaimer", f'''<p>This is a draft for discussion, not an offer or solicitation. {RISK} Nothing in this document is a promise of future features, prices or returns. Read the final version published before launch, and do your own research.</p>'''),
+("disclaimer", "Disclaimer", f'''<p>This is not an offer or solicitation. {RISK} Nothing in this document is a promise of future features, prices or returns. Do your own research.</p>'''),
 ]
 
 toc = "\n".join(f'        <li><a href="#{i}">{t}</a></li>' for i, t, _ in WP_SECTIONS)
@@ -484,7 +486,7 @@ WHITEPAPER = f'''<main id="main">
   <section class="page-head wrap">
     <h1 data-split>Whitepaper</h1>
     <p class="lead">How Build.vote is meant to work, what it costs and what can go wrong.</p>
-    <div class="meta"><span class="pill pill--draft">Version 0.1 · draft</span><span class="pill">Subject to change before launch</span></div>
+    <div class="meta"><span class="pill pill--done">Version 1.0</span><span class="pill">Changes announced on X first</span></div>
   </section>
   <div class="wrap wp">
     <nav class="toc" aria-label="Whitepaper sections">
@@ -546,8 +548,8 @@ LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL
       {readout("spend", "API spend", "Not live yet")}
       {readout("fees", "Creator fees claimed", "Not live yet")}
       {readout("commits", "Agent commits", "Loading…")}
-      {readout("holders", "Holders", "Token not launched")}
-      {readout("round", "Current round", "Round 1 opens after launch")}
+      {readout("holders", "Holders", "Loading…" if CA else "Token not launched")}
+      {readout("round", "Current round", "Round 1 opens soon")}
       {readout("payouts", "Contributor payouts", "Not live yet")}
     </dl>
   </section>
@@ -590,8 +592,8 @@ files = {
  "index.html": (head("Build.vote · You vote. An AI agent builds it, live.", DESC_HOME), INDEX),
  "live.html": (head("Live build · Build.vote", "Watch the agent work: build queue, commits, API spend and fee claims, each linked to its source."), LIVE),
  "roadmap.html": (head("Roadmap · Build.vote", "What Build.vote does next, in order, with no invented dates."), ROADMAP),
- "tokenomics.html": (head("Tokenomics · Build.vote", "Draft creator fee split and token parameters for Build.vote, finalized before launch."), TOKENOMICS),
- "whitepaper.html": (head("Whitepaper v0.1 · Build.vote", "Build.vote whitepaper, version 0.1 draft: mechanism, fees, the agent, safety and risks."), WHITEPAPER),
+ "tokenomics.html": (head("Tokenomics · Build.vote", "Creator fee split and token parameters for Build.vote."), TOKENOMICS),
+ "whitepaper.html": (head("Whitepaper v1.0 · Build.vote", "Build.vote whitepaper, version 1.0: mechanism, fees, the agent, safety and risks."), WHITEPAPER),
 }
 for name, (h, m) in files.items():
     with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as f:

@@ -58,7 +58,7 @@
     <ul class="tags" aria-label="Project status">
       <li class="tag--agent" data-agent-tag><b>Agent:</b> <span>connecting</span></li>
       <li><b>Token:</b> launching soon</li>
-      <li><b>Voting:</b> opens at launch</li>
+      <li><b>Voting:</b> round 1 soon</li>
     </ul>
     <div class="ca" role="group" aria-label="Contract address">
       <span class="ca__label">CA</span>
@@ -87,7 +87,7 @@
   <section class="section wrap ballot-section" aria-labelledby="ballot-title">
     <div class="ballot-intro">
       <h2 id="ballot-title" data-split>Mark the ballot</h2>
-      <p>This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now, and your mark counts for real once voting opens at launch.</p>
+      <p>This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now. Real votes are cast when round 1 opens.</p>
       <p>Signing proves you control the wallet. It moves nothing, costs nothing and approves nothing.</p>
       <p class="muted small">The final round 1 ballot is posted on X before voting opens.</p>
     </div>
@@ -127,7 +127,7 @@
         </details>
         <p id="sig-out" class="sig-out" role="status" aria-live="polite"></p>
       </div>
-      <p id="ballot-disclaimer" class="ballot__foot"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Practice round: you sign a plain text message, never a transaction. Votes start counting when voting opens at launch.</span></p>
+      <p id="ballot-disclaimer" class="ballot__foot"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Practice round: you sign a plain text message, never a transaction. Votes start counting when round 1 opens.</span></p>
     </form>
   </section>
 
@@ -182,10 +182,10 @@
   <section class="section wrap flow" aria-labelledby="flow-title">
     <div class="section__head">
       <h2 id="flow-title" data-split>Where the fees go</h2>
-      <p>Creator fees fund the work. This is the draft split, finalized and published before launch. Every claim and spend shows up on the <a href="live.html">live build</a> page with its transaction.</p>
+      <p>Creator fees fund the work. The split is fixed and public. Every claim and spend shows up on the <a href="live.html">live build</a> page with its transaction.</p>
     </div>
     <div class="card flow__card" data-spot>
-      <svg class="flow__svg" viewBox="0 0 1000 400" role="img" aria-label="Draft split of creator fees: API costs 40 percent, buybacks 30 percent, contributor rewards 20 percent, reserve 10 percent."><path class="flow__band" d="M200 104.0 C 470 104.0, 500 71.6, 744 71.6" stroke="#7fa2ff" stroke-width="115.2"/><path class="flow__pulse" style="--d:0.0s" d="M200 104.0 C 470 104.0, 500 71.6, 744 71.6" stroke="#7fa2ff"/><g class="flow__node" style="--d:0.2s"><rect x="744" y="14.0" width="250" height="115.2" rx="10" stroke="#7fa2ff"/><text x="764" y="68.6" class="flow__name">API costs</text><text x="764" y="88.6" class="flow__pct">40% draft</text></g><path class="flow__band" d="M200 216.0 C 470 216.0, 500 194.4, 744 194.4" stroke="#ff5a4d" stroke-width="86.4"/><path class="flow__pulse" style="--d:0.35s" d="M200 216.0 C 470 216.0, 500 194.4, 744 194.4" stroke="#ff5a4d"/><g class="flow__node" style="--d:0.30000000000000004s"><rect x="744" y="151.2" width="250" height="86.4" rx="10" stroke="#ff5a4d"/><text x="764" y="191.4" class="flow__name">Buybacks</text><text x="764" y="211.4" class="flow__pct">30% draft</text></g><path class="flow__band" d="M200 296.0 C 470 296.0, 500 288.4, 744 288.4" stroke="#b9caff" stroke-width="57.6"/><path class="flow__pulse" style="--d:0.7s" d="M200 296.0 C 470 296.0, 500 288.4, 744 288.4" stroke="#b9caff"/><g class="flow__node" style="--d:0.4s"><rect x="744" y="259.6" width="250" height="57.6" rx="10" stroke="#b9caff"/><text x="764" y="285.4" class="flow__name">Contributor rewards</text><text x="764" y="305.4" class="flow__pct">20% draft</text></g><path class="flow__band" d="M200 344.0 C 470 344.0, 500 363.2, 744 363.2" stroke="#9aa6c4" stroke-width="28.8"/><path class="flow__pulse" style="--d:1.0499999999999998s" d="M200 344.0 C 470 344.0, 500 363.2, 744 363.2" stroke="#9aa6c4"/><g class="flow__node" style="--d:0.5s"><rect x="744" y="339.2" width="250" height="48.0" rx="10" stroke="#9aa6c4"/><text x="764" y="360.2" class="flow__name">Reserve</text><text x="764" y="380.2" class="flow__pct">10% draft</text></g><g class="flow__src"><rect x="20" y="40" width="180" height="320" rx="14"/><text x="42" y="194.0" class="flow__name">Creator fees</text><text x="42" y="216.0" class="flow__pct">from token trades</text></g></svg>
+      <svg class="flow__svg" viewBox="0 0 1000 400" role="img" aria-label="Split of creator fees: API costs 40 percent, buybacks 30 percent, contributor rewards 20 percent, reserve 10 percent."><path class="flow__band" d="M200 104.0 C 470 104.0, 500 71.6, 744 71.6" stroke="#7fa2ff" stroke-width="115.2"/><path class="flow__pulse" style="--d:0.0s" d="M200 104.0 C 470 104.0, 500 71.6, 744 71.6" stroke="#7fa2ff"/><g class="flow__node" style="--d:0.2s"><rect x="744" y="14.0" width="250" height="115.2" rx="10" stroke="#7fa2ff"/><text x="764" y="68.6" class="flow__name">API costs</text><text x="764" y="88.6" class="flow__pct">40%</text></g><path class="flow__band" d="M200 216.0 C 470 216.0, 500 194.4, 744 194.4" stroke="#ff5a4d" stroke-width="86.4"/><path class="flow__pulse" style="--d:0.35s" d="M200 216.0 C 470 216.0, 500 194.4, 744 194.4" stroke="#ff5a4d"/><g class="flow__node" style="--d:0.30000000000000004s"><rect x="744" y="151.2" width="250" height="86.4" rx="10" stroke="#ff5a4d"/><text x="764" y="191.4" class="flow__name">Buybacks</text><text x="764" y="211.4" class="flow__pct">30%</text></g><path class="flow__band" d="M200 296.0 C 470 296.0, 500 288.4, 744 288.4" stroke="#b9caff" stroke-width="57.6"/><path class="flow__pulse" style="--d:0.7s" d="M200 296.0 C 470 296.0, 500 288.4, 744 288.4" stroke="#b9caff"/><g class="flow__node" style="--d:0.4s"><rect x="744" y="259.6" width="250" height="57.6" rx="10" stroke="#b9caff"/><text x="764" y="285.4" class="flow__name">Contributor rewards</text><text x="764" y="305.4" class="flow__pct">20%</text></g><path class="flow__band" d="M200 344.0 C 470 344.0, 500 363.2, 744 363.2" stroke="#9aa6c4" stroke-width="28.8"/><path class="flow__pulse" style="--d:1.0499999999999998s" d="M200 344.0 C 470 344.0, 500 363.2, 744 363.2" stroke="#9aa6c4"/><g class="flow__node" style="--d:0.5s"><rect x="744" y="339.2" width="250" height="48.0" rx="10" stroke="#9aa6c4"/><text x="764" y="360.2" class="flow__name">Reserve</text><text x="764" y="380.2" class="flow__pct">10%</text></g><g class="flow__src"><rect x="20" y="40" width="180" height="320" rx="14"/><text x="42" y="194.0" class="flow__name">Creator fees</text><text x="42" y="216.0" class="flow__pct">from token trades</text></g></svg>
       <ul class="flow__list">
         <li style="--c:#7fa2ff"><span class="flow__sw"></span><b>API costs</b><span class="flow__p">40%</span><small>Model calls and tools the agent uses</small><i style="--w:40%"></i></li>
         <li style="--c:#ff5a4d"><span class="flow__sw"></span><b>Buybacks</b><span class="flow__p">30%</span><small>Market buys, each linked to its transaction</small><i style="--w:30%"></i></li>
@@ -202,7 +202,7 @@
     </div>
     <ul class="card rules">
       <li><svg class="stamp stamp--check" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg><div><h3>Real data only</h3><p>The dashboard shows onchain records and real logs. If a number does not exist yet, we say so instead of guessing.</p></div></li>
-      <li><svg class="stamp stamp--check" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg><div><h3>Public fee rules</h3><p>The creator fee split is published before launch. Every claim and every spend links to its record so you can check it.</p></div></li>
+      <li><svg class="stamp stamp--check" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg><div><h3>Public fee rules</h3><p>The creator fee split is fixed and public. Every claim and every spend links to its record so you can check it.</p></div></li>
       <li><svg class="stamp stamp--check" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg><div><h3>Honest posting</h3><p>Posts describe what shipped and what did not. No price talk, no promises of returns.</p></div></li>
       <li><svg class="stamp stamp--check" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M11.5 20.5l6 6.5 11.5-13.5"/></svg><div><h3>Signatures only</h3><p>Voting asks you to sign a message. We will never ask for a transaction or a token approval to vote.</p></div></li>
     </ul>
@@ -219,17 +219,17 @@
       <div class="card contrib__item" data-tilt="4"><h3>Bug reports</h3><p>Show how to reproduce a bug. Confirmed reports earn more than plain issues.</p></div>
       <div class="card contrib__item" data-tilt="4"><h3>Pull requests</h3><p>Fix it yourself. Merged pull requests earn the biggest share.</p></div>
     </div>
-    <p class="muted small contrib__note">Submit work on <a href="https://github.com/builddotvote/buildvote-agent" target="_blank" rel="noopener noreferrer">GitHub</a>. Reward sizes are set in the final fee rules, published before launch.</p>
+    <p class="muted small contrib__note">Submit work on <a href="https://github.com/builddotvote/buildvote-agent" target="_blank" rel="noopener noreferrer">GitHub</a>. Reward sizes are posted with each accepted contribution.</p>
   </section>
 
   <section class="section wrap" aria-labelledby="faq-title">
     <div class="section__head"><h2 id="faq-title" data-split>Questions</h2></div>
     <div class="faq">
-      <details class="faq__item"><summary>Is the token live?</summary><p>Not yet. The contract address appears on this site and on X at launch. Anything posted anywhere else is not us.</p></details>
+      <details class="faq__item"><summary>Is the token live?</summary><p>Yes. The only official contract address is the one on this site and pinned on @BuildDotVote. Anything posted anywhere else is not us.</p></details>
       <details class="faq__item"><summary>What does the agent build?</summary><p>Real Solana products: a live rug radar, a smart money tracker, a treasury the agent runs itself and more. Holders vote on the order.</p></details>
       <details class="faq__item"><summary>How does voting work?</summary><p>When a round opens, balances are snapshotted. You sign a message naming your choice. Weight follows balance up to a cap, and the full list of signatures is published so anyone can recount.</p></details>
-      <details class="faq__item"><summary>Can whales take over a vote?</summary><p>Each wallet's weight is capped at a set share of the round's total vote. The draft cap is 5%. A cap does not stop someone splitting tokens across wallets, so we publish every signature for anyone to check.</p></details>
-      <details class="faq__item"><summary>Where do creator fees go?</summary><p>API costs, buybacks, contributor rewards and a reserve. The draft split is on the tokenomics page. Every claim and spend links to its record.</p></details>
+      <details class="faq__item"><summary>Can whales take over a vote?</summary><p>Each wallet's weight is capped at a set share of the round's total vote. The cap is 5%. A cap does not stop someone splitting tokens across wallets, so we publish every signature for anyone to check.</p></details>
+      <details class="faq__item"><summary>Where do creator fees go?</summary><p>API costs, buybacks, contributor rewards and a reserve. The split is on the tokenomics page. Every claim and spend links to its record.</p></details>
       <details class="faq__item"><summary>Will you ever ask me to sign a transaction to vote?</summary><p>No. Voting is a signed message only. If something asks for a transaction, an approval or your seed phrase, it is a scam.</p></details>
     </div>
   </section>
@@ -240,7 +240,7 @@
       <div class="cta">
         <div>
           <h2 id="follow-title">Follow the build</h2>
-          <p>Launch details, the fee split and the first ballot get posted on X first.</p>
+          <p>Round 1, every ballot and every update get posted on X first.</p>
         </div>
         <a class="btn btn--primary" href="https://x.com/BuildDotVote" target="_blank" rel="noopener noreferrer">Follow @BuildDotVote<span class="sr-only"> (opens in a new tab)</span></a>
       </div>

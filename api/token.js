@@ -130,11 +130,14 @@ module.exports = async function handler(req, res) {
     res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=600");
     return res.end(cache.body);
   }
-  const out = { configured: true, ca: mint, updated_at: new Date().toISOString(), holders: null, fees: null, errors: [] };
-  const [h, f] = await Promise.allSettled([
+  const out = { configured: true, ca: mint, updated_at: new Date().toISOString(), holders: null, fees: null, supply: null, errors: [] };
+  const [h, f, sp] = await Promise.allSettled([
     holders(url, mint),
     B58.test(creator) ? feeClaims(url, creator, mint, vaults) : Promise.resolve(null),
+    call(url, "getTokenSupply", [mint]),
   ]);
+  if (sp.status === "fulfilled" && sp.value && sp.value.value) out.supply = { amount: sp.value.value.uiAmountString, decimals: sp.value.value.decimals };
+  else if (sp.status === "rejected") out.errors.push("supply: " + sp.reason.message);
   if (h.status === "fulfilled") out.holders = { count: h.value.count, as_of: out.updated_at, source: `https://solscan.io/token/${mint}#holders` };
   else out.errors.push("holders: " + h.reason.message);
   if (f.status === "fulfilled" && f.value) {

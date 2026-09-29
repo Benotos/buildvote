@@ -1458,3 +1458,8 @@ a.sb:hover { filter: brightness(1.3); }
 .tl--live .tl__box { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(127, 162, 255, 0.15); }
 .tl--live .tl__box::after { content: ""; position: absolute; inset: 6px; border-radius: 2px; background: var(--blue); opacity: 0.8; animation: pulse 2s ease-in-out infinite; }
 .tl--next .tl__box { border-color: var(--red); }
+
+/* Final tokenomics note */
+.draft-note--final { border-color: color-mix(in srgb, var(--green) 45%, transparent); background: color-mix(in srgb, var(--green) 8%, transparent); }
+.draft-note--final .stamp { stroke: var(--green); }
+.params td .pill--done { margin-left: .5rem; }
