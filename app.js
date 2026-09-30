@@ -153,7 +153,7 @@
       return [
         (document.documentElement.getAttribute("data-brand") || "Build.vote") + " vote",
         "",
-        "Round: " + (state.live ? String(state.round.number) : "1 (practice round)"),
+        "Round: " + (state.round ? String(state.round.number) : "1"),
         "Choice: " + (state.choice || "(none selected)"),
         "Wallet: " + (state.pubkey || "(not connected)"),
         "Nonce: " + state.nonce,
@@ -172,14 +172,15 @@
     function render() {
       state.choice = currentChoice();
       previewEl.textContent = buildMessage();
-      signBtn.disabled = !(state.pubkey && state.choice);
+      signBtn.disabled = !(state.pubkey && state.choice && state.live);
       if (state.pubkey) {
         statusEl.innerHTML = "Connected with " + escapeHtml(state.wallet.name) + ": <strong>" + escapeHtml(shortKey(state.pubkey)) + "</strong>";
         connectBtn.textContent = "Disconnect";
       } else {
         connectBtn.textContent = "Connect wallet";
       }
-      if (!state.pubkey) signBtn.title = "Connect a wallet first";
+      if (!state.live) signBtn.title = "The next round opens soon";
+      else if (!state.pubkey) signBtn.title = "Connect a wallet first";
       else if (!state.choice) signBtn.title = "Mark an option first";
       else signBtn.removeAttribute("title");
     }
@@ -264,7 +265,7 @@
           if (!sig || typeof sig.length !== "number") throw new Error("The wallet returned no signature.");
           var b58 = base58(new Uint8Array(sig));
           var r = { choice: state.choice, wallet: state.pubkey, sig: b58, at: new Date() };
-          if (!state.live) { setOut(""); showReceipt(r); return; }
+          if (!state.live) { setOut("No round is open right now. Your signature was not sent.", true); return; }
           setOut("Counting your vote…");
           return fetch("api/vote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ wallet: state.pubkey, message: message, signature: b58 }) })
             .then(function (x) { return x.json().then(function (j) { return { ok: x.ok, j: j }; }); })
@@ -310,7 +311,7 @@
         "</dl>" +
         (r.counted
           ? '<p class="receipt__note">' + (r.replaced ? "Vote changed. " : "") + "Your vote is in the public tally. You can change it until the round closes; your latest signature counts.</p>"
-          : '<p class="receipt__note">Practice round. When a round opens, signatures like this one are checked against your balance and added to the public tally.</p>') +
+          : '<p class="receipt__note">Signed.</p>') +
         '<div class="btn-row">' +
           '<a class="btn btn--primary" href="' + escapeHtml(share) + '" target="_blank" rel="noopener noreferrer">Share on X</a>' +
           '<button type="button" class="btn btn--ghost" data-act="copy">Copy signature</button>' +
@@ -393,9 +394,10 @@
         '<a href="api/vote?full=1" target="_blank" rel="noopener">Every signature</a></p>';
     }
     function apply(d) {
-      if (!d || !d.configured || !d.round) return;
+      if (!d || !d.configured) return;
+      if (!d.round) { if (tagEl) tagEl.querySelector("span").textContent = "round 1 soon"; return; }
       var r = d.round;
-      drawTally(d);
+      if (r.open || (d.tally && d.tally.voters > 0)) drawTally(d);
       if (r.open) {
         var was = state.live;
         state.live = true; state.round = r;
@@ -407,12 +409,17 @@
         if (leadEl) leadEl.textContent = r.title + " Mark one option, connect your wallet and sign. Your vote goes straight into the public tally.";
         if (tagEl) { tagEl.classList.add("tag--live"); tagEl.querySelector("span").textContent = "live · round " + r.number; }
         if (ctaEl) ctaEl.textContent = "Vote now";
-        Array.prototype.forEach.call(document.querySelectorAll("[data-practice-only]"), function (el) { el.hidden = true; });
         if (!was) render();
       } else {
-        state.live = false;
+        state.live = false; state.round = { number: r.number + 1 };
         form.classList.remove("is-live");
-        if (tagEl) { tagEl.classList.remove("tag--live"); tagEl.querySelector("span").textContent = "round " + r.number + " closed"; }
+        var any = d.tally && d.tally.voters > 0;
+        if (panel && !any) { panel.remove(); panel = null; }
+        titleEl.textContent = any ? "Round " + r.number + " closed · round " + (r.number + 1) + " opens soon" : "Next round opens soon";
+        if (hintEl) hintEl.textContent = "Mark one";
+        if (tagEl) { tagEl.classList.remove("tag--live"); tagEl.querySelector("span").textContent = any ? "round " + r.number + " results in" : "next round soon"; }
+        if (!outEl.textContent) setOut("Voting is between rounds. Follow @" + ((document.querySelector(".nav__x") || {}).textContent || "BuildDotVote").replace(/^@/, "").split(" ")[0] + " for the next one.");
+        render();
       }
     }
     voting.refresh = function () {
@@ -1111,6 +1118,38 @@
     }).catch(function () {});
   }
 
+  /* ---------- Home: live numbers strip ---------- */
+  function initStats() {
+    var box = document.querySelector("[data-stats]");
+    if (!box || !/^https?:/.test(location.protocol)) return;
+    function put(k, v, note) {
+      var el = box.querySelector('[data-stat="' + k + '"]'); if (!el || v == null) return;
+      el.textContent = v; el.closest(".stat").classList.add("is-live");
+      if (note) box.querySelector('[data-stat-note="' + k + '"]').textContent = note;
+    }
+    function num(n, d) { return Number(n).toLocaleString("en-US", { maximumFractionDigits: d || 0 }); }
+    function short(n) { n = Number(n); return n >= 1e9 ? num(n / 1e9, 2) + "B" : n >= 1e6 ? num(n / 1e6, 1) + "M" : num(n); }
+    function load() {
+      fetch("api/token", { cache: "no-store" }).then(function (x) { return x.ok ? x.json() : null; }).then(function (d) {
+        if (!d || !d.configured) return;
+        if (d.fees) put("fees", num(d.fees.total_sol, 2) + " SOL", d.fees.claims.length + " claim" + (d.fees.claims.length === 1 ? "" : "s") + " on Solana");
+        if (d.supply) put("supply", short(d.supply.amount), "Read from the chain");
+      }).catch(function () {});
+      fetch("api/vote", { cache: "no-store" }).then(function (x) { return x.ok ? x.json() : null; }).then(function (d) {
+        if (!d || !d.round) return;
+        put("votes", num(d.tally.voters), d.round.open ? "Round " + d.round.number + " · voting live" : "Round " + d.round.number);
+      }).catch(function () {});
+      var gh = (box.getAttribute("data-github") || "").match(/github\.com\/([^\/]+)\/([^\/#?]+)/);
+      if (gh) fetch("https://api.github.com/repos/" + gh[1] + "/" + gh[2] + "/commits?per_page=1").then(function (x) {
+        if (!x.ok) return;
+        var m = (x.headers.get("link") || "").match(/[?&]page=(\d+)>; rel="last"/);
+        return x.json().then(function (list) { put("commits", m ? num(m[1]) : String((list || []).length), "Public repo"); });
+      }).catch(function () {});
+    }
+    load();
+    setInterval(function () { if (!document.hidden) load(); }, 60000);
+  }
+
   /* ---------- Copy contract address ---------- */
   function initCopy() {
     var btn = document.querySelector(".ca__copy");
@@ -1133,6 +1172,7 @@
     initCopy();
     initHomeLive();
     initTokenStats();
+    initStats();
     initLive();
     initMotion();
     initSpotlight();

@@ -67,7 +67,7 @@
     </div>
     <div class="btn-row hero__cta">
       <a class="btn btn--primary" href="https://pump.fun/coin/Ef4P1cmK9ot9pzQ9TfFczjKgs7qTpzYuHqQkRHj7pump" target="_blank" rel="noopener noreferrer">Buy on pump.fun</a>
-      <a class="btn btn--ghost" href="#ballot-title" data-vote-cta>Try the practice ballot</a>
+      <a class="btn btn--ghost" href="#ballot-title" data-vote-cta>Vote now</a>
       <a class="btn btn--ghost" href="live.html">Watch the live build</a>
     </div>
     <a class="livebar" href="live.html" data-livebar data-live-json="https://raw.githubusercontent.com/builddotvote/buildvote-agent/status/live.json" data-github="https://github.com/builddotvote/buildvote-agent" hidden>
@@ -84,17 +84,25 @@
     <div class="marquee__track"><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11 11l18 18M29 11L11 29"/></svg>Holders vote</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>Agent builds live</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11 11l18 18M29 11L11 29"/></svg>Signatures only</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>Every spend on the record</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11 11l18 18M29 11L11 29"/></svg>Public fee rules</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>Whale cap on every round</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11 11l18 18M29 11L11 29"/></svg>Contributors get paid</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>Real data only</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11 11l18 18M29 11L11 29"/></svg>Holders vote</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>Agent builds live</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11 11l18 18M29 11L11 29"/></svg>Signatures only</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>Every spend on the record</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11 11l18 18M29 11L11 29"/></svg>Public fee rules</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>Whale cap on every round</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11 11l18 18M29 11L11 29"/></svg>Contributors get paid</span><span class="marquee__item"><svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="5"/><path d="M11.5 20.5l6 6.5 11.5-13.5"/></svg>Real data only</span></div>
   </div>
 
+  <section class="wrap stats" aria-label="Live numbers" data-stats data-github="https://github.com/builddotvote/buildvote-agent">
+    <div class="stats__grid">
+      <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Creator fees claimed</span><b class="stat__v" data-stat="fees">—</b><small data-stat-note="fees">From Solana</small></div>
+      <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Agent commits</span><b class="stat__v" data-stat="commits">—</b><small data-stat-note="commits">Public repo</small></div>
+      <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Wallets voted</span><b class="stat__v" data-stat="votes">—</b><small data-stat-note="votes">This round</small></div>
+      <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Token supply</span><b class="stat__v" data-stat="supply">—</b><small data-stat-note="supply">Read from the chain</small></div>
+    </div>
+  </section>
+
   <section class="section wrap ballot-section" aria-labelledby="ballot-title">
     <div class="ballot-intro">
       <h2 id="ballot-title" data-split>Mark the ballot</h2>
-      <p id="ballot-lead">This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now. Real votes are cast when round 1 opens, and this ballot switches to live on its own.</p>
+      <p id="ballot-lead">Mark one option, connect your wallet and sign. Your vote goes straight into the public tally, weighted by the tokens you hold.</p>
       <p>Signing proves you control the wallet. It moves nothing, costs nothing and approves nothing.</p>
-      <p class="muted small" data-practice-only>The round 1 ballot is posted on X when voting opens.</p>
     </div>
 
     <form class="card ballot" id="ballot" data-tilt="3" aria-labelledby="ballot-name" aria-describedby="ballot-disclaimer" novalidate>
       <div class="ballot__head">
-        <p class="ballot__title" id="ballot-name">Round 1 · practice ballot</p>
+        <p class="ballot__title" id="ballot-name">Round 1 · ballot</p>
         <p class="ballot__hint">Mark one</p>
       </div>
       <fieldset class="ballot__options">
@@ -127,7 +135,7 @@
         </details>
         <p id="sig-out" class="sig-out" role="status" aria-live="polite"></p>
       </div>
-      <p id="ballot-disclaimer" class="ballot__foot"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>Practice round: you sign a plain text message, never a transaction. Votes start counting when round 1 opens.</span></p>
+      <p id="ballot-disclaimer" class="ballot__foot"><svg class="stamp stamp--static" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="4" y="4" width="32" height="32" rx="5"/><path class="x x1" pathLength="1" d="M10.5 11c5 5.2 10.6 10.8 19 19.5"/><path class="x x2" pathLength="1" d="M30 10.5c-6.2 6-12 12.2-19.2 19.8"/></svg><span>You sign a plain text message, never a transaction. It moves no funds and approves nothing.</span></p>
     </form>
   </section>
 

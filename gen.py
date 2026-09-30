@@ -216,7 +216,7 @@ INDEX = f'''<main id="main">
     </div>
     <div class="btn-row hero__cta">
       {BUY}
-      <a class="btn btn--ghost" href="#ballot-title" data-vote-cta>Try the practice ballot</a>
+      <a class="btn btn--ghost" href="#ballot-title" data-vote-cta>Vote now</a>
       <a class="btn btn--ghost" href="live.html">Watch the live build</a>
     </div>
     <a class="livebar" href="live.html" data-livebar data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL}" hidden>
@@ -233,17 +233,25 @@ INDEX = f'''<main id="main">
     <div class="marquee__track">{MARQUEE}{MARQUEE}</div>
   </div>
 
+  <section class="wrap stats" aria-label="Live numbers" data-stats data-github="{GITHUB_URL}">
+    <div class="stats__grid">
+      <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Creator fees claimed</span><b class="stat__v" data-stat="fees">—</b><small data-stat-note="fees">From Solana</small></div>
+      <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Agent commits</span><b class="stat__v" data-stat="commits">—</b><small data-stat-note="commits">Public repo</small></div>
+      <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Wallets voted</span><b class="stat__v" data-stat="votes">—</b><small data-stat-note="votes">This round</small></div>
+      <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Token supply</span><b class="stat__v" data-stat="supply">—</b><small data-stat-note="supply">Read from the chain</small></div>
+    </div>
+  </section>
+
   <section class="section wrap ballot-section" aria-labelledby="ballot-title">
     <div class="ballot-intro">
       <h2 id="ballot-title" data-split>Mark the ballot</h2>
-      <p id="ballot-lead">This is exactly how a round works. Mark one option, connect your wallet and sign. Practice now. Real votes are cast when round 1 opens, and this ballot switches to live on its own.</p>
+      <p id="ballot-lead">Mark one option, connect your wallet and sign. Your vote goes straight into the public tally, weighted by the tokens you hold.</p>
       <p>Signing proves you control the wallet. It moves nothing, costs nothing and approves nothing.</p>
-      <p class="muted small" data-practice-only>The round 1 ballot is posted on X when voting opens.</p>
     </div>
 
     <form class="card ballot" id="ballot" data-tilt="3" aria-labelledby="ballot-name" aria-describedby="ballot-disclaimer" novalidate>
       <div class="ballot__head">
-        <p class="ballot__title" id="ballot-name">Round 1 · practice ballot</p>
+        <p class="ballot__title" id="ballot-name">Round 1 · ballot</p>
         <p class="ballot__hint">Mark one</p>
       </div>
       <fieldset class="ballot__options">
@@ -264,7 +272,7 @@ INDEX = f'''<main id="main">
         </details>
         <p id="sig-out" class="sig-out" role="status" aria-live="polite"></p>
       </div>
-      <p id="ballot-disclaimer" class="ballot__foot">{STAMP.format(cls="stamp--static")}<span>Practice round: you sign a plain text message, never a transaction. Votes start counting when round 1 opens.</span></p>
+      <p id="ballot-disclaimer" class="ballot__foot">{STAMP.format(cls="stamp--static")}<span>You sign a plain text message, never a transaction. It moves no funds and approves nothing.</span></p>
     </form>
   </section>
 
@@ -359,12 +367,12 @@ def tl(n, title, status, text, done, live=False):
 ROADMAP = f'''<main id="main">
   <section class="page-head wrap">
     <h1 data-split>Roadmap</h1>
-    <p class="lead">What ships, in order. Foundations, launch and the voting backend are done, and the agent is building in public. Dates are added as they are locked in.</p>
+    <p class="lead">What ships, in order. Foundations and the voting backend are done, launch is rolling out and the agent is building in public. Dates are added as they are locked in.</p>
   </section>
   <section class="wrap" aria-label="Roadmap steps">
     <ol class="timeline">
 {tl(1, "Foundations", "done", "This site, the whitepaper, the fee rules and the agent's working setup: a public repo, hard usage limits and full logging. The agent is already building in public.", "the site is live, the whitepaper is public and the agent can run end to end on a test task.")}
-{tl(2, "Launch", "done", "The token is live. Supply, holders and the fee split are public and linked from this site.", "the token exists and the final parameters are posted and linked from this site.")}
+{tl(2, "Launch", "live", "The token is live and trading. Supply, holders and every fee claim are public and linked from this site.", "the token exists and the final parameters are posted and linked from this site.")}
 {tl(3, "Voting backend", "done", "Balance checks, signed message checks and a public tally that anyone can recompute from the raw signatures.", "a test round runs with real signatures and the tally can be reproduced by someone outside the team.")}
 {tl(4, "Live dashboard", "live", "One page for commits, API spend and creator fee claims, each linked to its source record.", "every number on the dashboard links to a commit, an invoice log or a transaction.")}
 {tl(5, "Round 1", "next", "The first real ballot. Holders vote, the agent builds the winner in public and ships it.", "the winning tool is live and its build log and costs are public.")}
@@ -518,7 +526,6 @@ LIVE = f"""<main id="main" data-ca="{CA}" data-live-json="{LIVE_JSON}" data-gith
         <span class="console__dots" aria-hidden="true"><i></i><i></i><i></i></span>
         <h2 id="console-title" class="console__title">agent@build.vote</h2>
         <span class="console__meta"><span data-c="session">no session</span><span data-c="clock"></span><span data-c="turns"></span></span>
-        <button type="button" class="console__demo" data-demo-btn>Watch a demo</button>
       </div>
       <div class="console__task" role="status" aria-live="polite">
         <span class="dot" aria-hidden="true"></span>
