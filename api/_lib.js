@@ -136,6 +136,20 @@ async function snapshotHolders(mint) {
   return { slot, decimals: supply.value.decimals, balances: bal };
 }
 
+// One wallet's balance of the token right now (all its token accounts, both token programs). Cheap, works on free RPC plans.
+async function ownerBalance(owner, mint) {
+  const r = await call("getTokenAccountsByOwner", [owner, { mint }, { encoding: "jsonParsed", commitment: "confirmed" }]);
+  let raw = 0n, decimals = null;
+  for (const a of (r && r.value) || []) {
+    const t = a.account && a.account.data && a.account.data.parsed && a.account.data.parsed.info && a.account.data.parsed.info.tokenAmount;
+    if (!t) continue;
+    raw += BigInt(t.amount);
+    decimals = t.decimals;
+  }
+  if (decimals === null) decimals = (await call("getTokenSupply", [mint])).value.decimals;
+  return { raw, decimals };
+}
+
 // ---------- ballot message ----------
 // Must match the text the site asks wallets to sign, line for line.
 function parseMessage(text) {
@@ -155,7 +169,7 @@ function parseMessage(text) {
 }
 
 // ---------- tally ----------
-// Weight = balance at the snapshot. No wallet may hold more than CAP_PCT% of the round's total counted weight.
+// Weight = tokens held when voting, checked again at close (the lower number counts). No wallet may hold more than CAP_PCT% of the round's total counted weight.
 // The heaviest wallets are trimmed to one common cap c, the largest value where c <= share * (sum of all trimmed weights).
 // With fewer than 100/CAP_PCT voters a 5% share is impossible, so the max share becomes 1 / number of voters.
 function capValue(ws, share) {
@@ -177,11 +191,12 @@ function tally(options, votes, decimals) {
   const list = Object.values(votes);
   const scale = 10 ** (decimals || 0);
   const share = list.length ? Math.max(CAP_PCT / 100, 1 / list.length) : CAP_PCT / 100;
-  const cap = capValue(list.map((v) => Number(v.balance) / scale), share);
+  const bal = (v) => Number(v.balance_final != null ? v.balance_final : v.balance) / scale;
+  const cap = capValue(list.map(bal), share);
   const per = {};
   for (const o of options) per[o] = { choice: o, votes: 0, weight: 0 };
   for (const v of list) {
-    const w = Math.min(Number(v.balance) / scale, cap);
+    const w = Math.min(bal(v), cap);
     v.weight = w;
     if (!per[v.choice]) continue;
     per[v.choice].votes += 1;
@@ -197,4 +212,33 @@ function tally(options, votes, decimals) {
   return { rows, voters: list.length, cap_pct: CAP_PCT, max_share_pct: Math.round(share * 10000) / 100, cap_tokens: cap === Infinity ? null : Math.round(cap * 100) / 100 };
 }
 
-module.exports = { env, B58, CAP_PCT, b58encode, b58decode, verifySig, redis, pipeline, redisConf, hashToObj, call, snapshotHolders, parseMessage, tally, capValue };
+
+// ---------- close a round ----------
+// Re-check every voter's balance now. Final weight = the lower of (balance when voting, balance at close),
+// so tokens moved to a second wallet after voting cannot be counted twice.
+async function finalizeRound(round, mint) {
+  if (round.finalized_at) return round;
+  const lock = await redis("SET", "bv:finalizing:" + round.number, "1", "NX", "EX", 120);
+  if (lock !== "OK") return round;
+  const key = "bv:votes:" + round.number;
+  const votes = hashToObj(await redis("HGETALL", key));
+  const wallets = Object.keys(votes);
+  for (let i = 0; i < wallets.length; i += 4) {
+    await Promise.all(wallets.slice(i, i + 4).map(async (w) => {
+      const v = JSON.parse(votes[w]);
+      if (v.balance_final != null) return;
+      const now = (await ownerBalance(w, mint)).raw;
+      const atVote = BigInt(v.balance);
+      v.balance_close = now.toString();
+      v.balance_final = (now < atVote ? now : atVote).toString();
+      await redis("HSET", key, w, JSON.stringify(v));
+    }));
+  }
+  round.open = false;
+  round.closed_at = round.closed_at || new Date().toISOString();
+  round.finalized_at = new Date().toISOString();
+  await redis("SET", "bv:round", JSON.stringify(round));
+  return round;
+}
+
+module.exports = { env, B58, CAP_PCT, b58encode, b58decode, verifySig, redis, pipeline, redisConf, hashToObj, call, snapshotHolders, ownerBalance, parseMessage, tally, capValue, finalizeRound };

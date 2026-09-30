@@ -22,7 +22,7 @@
 <body>
 <main class="adm">
   <h1>Round admin</h1>
-  <p class="muted">Not linked anywhere. Only works with the ADMIN_KEY set in Vercel. Opening a round takes the holder snapshot right then.</p>
+  <p class="muted">Not linked anywhere. Only works with the ADMIN_KEY set in Vercel. Closing a round re-checks every voter's balance; the lower of vote time and close time counts.</p>
 
   <div class="card">
     <label for="key">Admin key</label>
@@ -39,7 +39,7 @@ Smart money tracker</textarea>
       <div><label for="min">Min tokens</label><input id="min" type="number" min="0" value="0"></div>
     </div>
     <div class="btn-row">
-      <button class="btn btn--primary" id="open" type="button">Open round + snapshot</button>
+      <button class="btn btn--primary" id="open" type="button">Open round</button>
       <button class="btn btn--ghost" id="close" type="button">Close round now</button>
       <button class="btn btn--ghost" id="check" type="button">Check tally</button>
     </div>
@@ -52,13 +52,13 @@ Smart money tracker</textarea>
   function $(id) { return document.getElementById(id); }
   function show(x) { out.textContent = typeof x === "string" ? x : JSON.stringify(x, null, 2); }
   function post(body) {
-    show("Working… (the snapshot can take a few seconds)");
+    show("Working…");
     return fetch("api/round", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + $("key").value.trim() }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); }).then(show).catch(function (e) { show("Error: " + e.message); });
   }
   $("open").onclick = function () {
     var opts = $("opts").value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
-    if (!confirm("Open round " + $("num").value + " with " + opts.length + " options? The snapshot is taken now.")) return;
+    if (!confirm("Open round " + $("num").value + " with " + opts.length + " options?")) return;
     post({ action: "open", number: +$("num").value, title: $("title").value, options: opts, hours: +$("hours").value, min_tokens: +$("min").value });
   };
   $("close").onclick = function () { if (confirm("Close the current round now?")) post({ action: "close" }); };

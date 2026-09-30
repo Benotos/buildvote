@@ -1,4 +1,4 @@
-// Vercel serverless function: open or close a voting round. Admin only.
+// Vercel serverless function: open or close a voting round. Admin only. Closing re-checks every voter's balance.
 // Set ADMIN_KEY in Vercel env vars (a long random string). Use admin.html, or:
 //   POST /api/round  Authorization: Bearer <ADMIN_KEY>
 //   { "action": "open", "number": 1, "title": "What should the agent build first?",
@@ -43,10 +43,9 @@ module.exports = async function handler(req, res) {
 
     if (body.action === "close") {
       if (!round) return send(res, 409, { error: "No round to close." });
-      round.open = false;
       round.closed_at = round.closed_at || new Date().toISOString();
-      await L.redis("SET", "bv:round", JSON.stringify(round));
-      return send(res, 200, { ok: true, round });
+      const done = await L.finalizeRound(round, mint);
+      return send(res, 200, { ok: true, round: done });
     }
 
     if (body.action === "open") {
@@ -61,17 +60,7 @@ module.exports = async function handler(req, res) {
       }
       const hours = Math.max(1, Math.min(24 * 14, Number(body.hours) || 48));
 
-      const snap = await L.snapshotHolders(mint);
-      const key = "bv:snap:" + number;
-      const entries = [...snap.balances.entries()];
-      const cmds = [["DEL", key]];
-      for (let i = 0; i < entries.length; i += 1000) {
-        const args = ["HSET", key];
-        for (const [o, a] of entries.slice(i, i + 1000)) args.push(o, a.toString());
-        cmds.push(args);
-      }
-      await L.pipeline(cmds);
-
+      const decimals = (await L.call("getTokenSupply", [mint])).value.decimals;
       const minUi = Math.max(0, Number(body.min_tokens) || 0);
       const now = new Date();
       const next = {
@@ -82,8 +71,8 @@ module.exports = async function handler(req, res) {
         closes_at: new Date(now.getTime() + hours * 3600 * 1000).toISOString(),
         closed_at: null,
         min_ui: minUi,
-        min_raw: minUi > 0 ? (BigInt(Math.round(minUi * 1e6)) * 10n ** BigInt(snap.decimals) / 1000000n).toString() : null,
-        snapshot: { slot: snap.slot, holders: entries.length, decimals: snap.decimals, taken_at: now.toISOString() },
+        min_raw: minUi > 0 ? (BigInt(Math.round(minUi * 1e6)) * 10n ** BigInt(decimals) / 1000000n).toString() : null,
+        decimals,
       };
       await L.redis("SET", "bv:round", JSON.stringify(next));
       return send(res, 200, { ok: true, round: next });

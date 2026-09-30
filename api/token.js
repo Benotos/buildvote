@@ -14,7 +14,7 @@ const PUMP_PROGRAMS = new Set([
 ]);
 const WSOL = "So11111111111111111111111111111111111111112";
 const B58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-const TTL = 120 * 1000;
+const TTL = 5 * 60 * 1000; // refresh at most every 5 minutes to stay inside free RPC limits
 const MAX_TX = 60; // most recent creator transactions scanned per refresh
 let cache = { at: 0, body: null };
 const good = {}; // last good value per field, reused if a later refresh fails
@@ -168,10 +168,14 @@ module.exports = async function handler(req, res) {
     const sp = await call(url, "getTokenSupply", [mint]);
     good.supply = { amount: sp.value.uiAmountString, decimals: sp.value.decimals };
   } catch (e) { out.errors.push("supply: " + e.message); }
-  try {
-    const h = await holders(url, mint);
-    good.holders = { count: h.count, as_of: out.updated_at, source: `https://solscan.io/token/${mint}#holders` };
-  } catch (e) { out.errors.push("holders: " + e.message); }
+  // Holder counts need a heavy RPC call that many free plans block. Try it, and if it fails wait 30 minutes before trying again.
+  if (!good.holdersFailAt || Date.now() - good.holdersFailAt > 30 * 60 * 1000) {
+    try {
+      const h = await holders(url, mint);
+      good.holders = { count: h.count, as_of: out.updated_at, source: `https://solscan.io/token/${mint}#holders` };
+      good.holdersFailAt = 0;
+    } catch (e) { good.holdersFailAt = Date.now(); out.notes = ["holders: not available on this RPC plan (" + e.message + ")"]; }
+  }
   if (B58.test(creator)) {
     try {
       const f = await feeClaims(url, creator, mint, vaults);
@@ -185,7 +189,7 @@ module.exports = async function handler(req, res) {
   const body = JSON.stringify(out);
   cache = { at: out.errors.length ? Date.now() - TTL / 2 : Date.now(), body };
   // Shared CDN cache: every visitor reads the same copy, so the RPC is called about once a minute, not once per visitor.
-  res.setHeader("Cache-Control", out.errors.length ? "s-maxage=60, stale-while-revalidate=300" : "s-maxage=120, stale-while-revalidate=600");
+  res.setHeader("Cache-Control", out.errors.length ? "s-maxage=120, stale-while-revalidate=600" : "s-maxage=300, stale-while-revalidate=900");
   res.end(body);
 };
 module.exports._test = { claimAmount, holders, feeClaims, b58 };

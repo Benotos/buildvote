@@ -1,8 +1,8 @@
 // Vercel serverless function: the public ballot box.
-//   GET  /api/vote              current round, live tally
-//   GET  /api/vote?full=1       plus every signed vote (message + signature + snapshot balance), so anyone can recount
-//   GET  /api/vote?snapshot=1   every wallet balance recorded at the round's snapshot
-//   POST /api/vote              { wallet, message, signature }  cast or replace a vote
+//   GET  /api/vote          current round and live tally
+//   GET  /api/vote?full=1   plus every signed vote (message, signature, balances), so anyone can recount
+//   POST /api/vote          { wallet, message, signature }  cast or replace a vote
+// Weight: tokens held when voting, checked again when the round closes. The lower number counts.
 // Needs: SOLANA_RPC_URL, TOKEN_CA, and Upstash Redis (see _lib.js).
 const L = require("./_lib");
 
@@ -19,11 +19,13 @@ async function loadRound() {
   const raw = await L.redis("GET", "bv:round");
   if (!raw) return null;
   const r = JSON.parse(raw);
-  r.open = !!r.open && !r.closed_at && (!r.closes_at || Date.now() < Date.parse(r.closes_at));
+  r.expired = !r.closed_at && !!r.closes_at && Date.now() >= Date.parse(r.closes_at);
+  r.open = !!r.open && !r.closed_at && !r.expired;
   return r;
 }
 function publicRound(r) {
-  return { number: r.number, title: r.title, options: r.options, open: r.open, opened_at: r.opened_at, closes_at: r.closes_at || null, closed_at: r.closed_at || null, min_tokens: r.min_ui || 0, snapshot: r.snapshot };
+  return { number: r.number, title: r.title, options: r.options, open: r.open, opened_at: r.opened_at, closes_at: r.closes_at || null,
+    closed_at: r.closed_at || null, final: !!r.finalized_at, min_tokens: r.min_ui || 0, weight_rule: "lower of balance when voting and balance at close" };
 }
 async function readBody(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -35,20 +37,20 @@ async function readBody(req) {
 
 module.exports = async function handler(req, res) {
   if (!L.redisConf()) return send(res, 200, { configured: false });
+  const mint = L.env("TOKEN_CA");
   try {
-    const round = await loadRound();
+    let round = await loadRound();
 
     if (req.method === "GET") {
       if (!round) return send(res, 200, { configured: true, round: null }, "s-maxage=10, stale-while-revalidate=30");
-      const q = new URL(req.url, "http://x").searchParams;
-      if (q.get("snapshot")) {
-        const h = L.hashToObj(await L.redis("HGETALL", "bv:snap:" + round.number));
-        return send(res, 200, { round: round.number, snapshot: round.snapshot, balances: h }, "s-maxage=300");
+      if ((round.expired || round.closed_at) && !round.finalized_at && L.B58.test(mint)) {
+        try { round = await L.finalizeRound(round, mint); round.open = false; } catch (e) { /* retried on the next request */ }
       }
+      const q = new URL(req.url, "http://x").searchParams;
       const votes = {};
       const h = L.hashToObj(await L.redis("HGETALL", "bv:votes:" + round.number));
       for (const k in h) votes[k] = JSON.parse(h[k]);
-      const t = L.tally(round.options, votes, round.snapshot.decimals);
+      const t = L.tally(round.options, votes, round.decimals);
       const out = { configured: true, round: publicRound(round), tally: t, updated_at: new Date().toISOString() };
       if (q.get("full")) out.votes = Object.values(votes).sort((a, b) => (a.at < b.at ? -1 : 1));
       return send(res, 200, out, "s-maxage=5, stale-while-revalidate=20");
@@ -79,13 +81,11 @@ module.exports = async function handler(req, res) {
     try { ok = L.verifySig(wallet, message, signature); } catch (e) { ok = false; }
     if (!ok) return send(res, 401, { error: "The signature does not match this wallet." });
 
-    const bal = await L.redis("HGET", "bv:snap:" + round.number, wallet);
-    if (!bal || BigInt(bal) === 0n) {
-      return send(res, 403, { error: "This wallet held no tokens at the snapshot (slot " + round.snapshot.slot + "). Tokens bought after the snapshot count from the next round." });
-    }
-    if (round.min_raw && BigInt(bal) < BigInt(round.min_raw)) {
-      return send(res, 403, { error: "This wallet held less than the " + round.min_ui + " token minimum at the snapshot." });
-    }
+    let bal;
+    try { bal = (await L.ownerBalance(wallet, mint)).raw; }
+    catch (e) { return send(res, 503, { error: "Could not read your balance right now. Try again in a minute." }); }
+    if (bal === 0n) return send(res, 403, { error: "This wallet holds no tokens, so it cannot vote." });
+    if (round.min_raw && bal < BigInt(round.min_raw)) return send(res, 403, { error: "This wallet holds less than the " + round.min_ui + " token minimum." });
 
     const fresh = await L.redis("SET", "bv:nonce:" + m.nonce, wallet, "NX", "EX", 86400);
     if (fresh !== "OK") return send(res, 409, { error: "This signature was already used. Sign again." });
@@ -93,11 +93,10 @@ module.exports = async function handler(req, res) {
     const key = "bv:votes:" + round.number;
     const prev = await L.redis("HGET", key, wallet);
     if (prev && JSON.parse(prev).at > new Date(at).toISOString()) return send(res, 409, { error: "A newer vote from this wallet is already counted." });
-    const vote = { wallet, choice: m.choice, balance: bal, message, signature, at: new Date(at).toISOString() };
+    const vote = { wallet, choice: m.choice, balance: bal.toString(), message, signature, at: new Date(at).toISOString() };
     await L.redis("HSET", key, wallet, JSON.stringify(vote));
 
-    const scale = 10 ** round.snapshot.decimals;
-    return send(res, 200, { ok: true, replaced: !!prev, round: round.number, choice: m.choice, balance: Number(bal) / scale });
+    return send(res, 200, { ok: true, replaced: !!prev, round: round.number, choice: m.choice, balance: Number(bal) / 10 ** round.decimals });
   } catch (e) {
     return send(res, 500, { error: "Server error: " + e.message });
   }

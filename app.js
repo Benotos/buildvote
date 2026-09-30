@@ -305,12 +305,12 @@
         '<dl class="receipt__rows">' +
           "<div><dt>Wallet</dt><dd><code>" + escapeHtml(shortKey(r.wallet)) + "</code></dd></div>" +
           "<div><dt>Signed</dt><dd>" + escapeHtml(time) + "</dd></div>" +
-          (r.counted ? "<div><dt>Weight</dt><dd>" + escapeHtml(Number(r.balance).toLocaleString("en-US", { maximumFractionDigits: 2 })) + " tokens at the snapshot</dd></div>" : "") +
+          (r.counted ? "<div><dt>Weight</dt><dd>" + escapeHtml(Number(r.balance).toLocaleString("en-US", { maximumFractionDigits: 2 })) + " tokens now. Hold them until the round closes.</dd></div>" : "") +
           "<div><dt>Signature</dt><dd><code>" + escapeHtml(r.sig.slice(0, 10) + "…" + r.sig.slice(-6)) + "</code></dd></div>" +
         "</dl>" +
         (r.counted
           ? '<p class="receipt__note">' + (r.replaced ? "Vote changed. " : "") + "Your vote is in the public tally. You can change it until the round closes; your latest signature counts.</p>"
-          : '<p class="receipt__note">Practice round. When a round opens, signatures like this one are checked against the snapshot and added to the public tally.</p>') +
+          : '<p class="receipt__note">Practice round. When a round opens, signatures like this one are checked against your balance and added to the public tally.</p>') +
         '<div class="btn-row">' +
           '<a class="btn btn--primary" href="' + escapeHtml(share) + '" target="_blank" rel="noopener noreferrer">Share on X</a>' +
           '<button type="button" class="btn btn--ghost" data-act="copy">Copy signature</button>' +
@@ -388,8 +388,9 @@
           return '<li class="' + (t.voters && x.pct === top ? "is-lead" : "") + '"><div class="tally__top"><b>' + escapeHtml(x.choice) + "</b><span>" + x.pct.toFixed(1) + "%</span></div>" +
             '<div class="tally__bar"><i style="width:' + x.pct + '%"></i></div><small>' + x.votes + (x.votes === 1 ? " wallet" : " wallets") + "</small></li>";
         }).join("") + "</ol>" +
-        '<p class="tally__foot">Snapshot at slot ' + r.snapshot.slot.toLocaleString("en-US") + ", " + r.snapshot.holders.toLocaleString("en-US") + " holders. Weight follows snapshot balance, max " + t.max_share_pct + "% per wallet. " +
-        '<a href="api/vote?full=1" target="_blank" rel="noopener">Every signature</a> · <a href="api/vote?snapshot=1" target="_blank" rel="noopener">Snapshot</a></p>';
+        '<p class="tally__foot">Weight is the tokens you hold when you vote, checked again when the round closes; the lower number counts. Max ' + t.max_share_pct + "% per wallet. " +
+        (r.open ? "" : (r.final ? "Final balances checked. " : "Checking final balances… ")) +
+        '<a href="api/vote?full=1" target="_blank" rel="noopener">Every signature</a></p>';
     }
     function apply(d) {
       if (!d || !d.configured || !d.round) return;
@@ -402,7 +403,7 @@
         setOptions(r.options);
         titleEl.textContent = "Round " + r.number + " · voting live";
         if (hintEl) hintEl.textContent = r.closes_at ? left(r.closes_at) : "Mark one";
-        if (footEl) footEl.textContent = "You sign a plain text message, never a transaction. Weight is your balance at the snapshot. Your latest signature counts until the round closes.";
+        if (footEl) footEl.textContent = "You sign a plain text message, never a transaction. Weight is what you hold when you vote, checked again at close. Your latest signature counts.";
         if (leadEl) leadEl.textContent = r.title + " Mark one option, connect your wallet and sign. Your vote goes straight into the public tally.";
         if (tagEl) { tagEl.classList.add("tag--live"); tagEl.querySelector("span").textContent = "live · round " + r.number; }
         if (ctaEl) ctaEl.textContent = "Vote now";
@@ -744,6 +745,22 @@
       })(t0);
       el.parentNode.classList.remove("is-fresh"); void el.offsetWidth; el.parentNode.classList.add("is-fresh");
     }
+    var roundLive = false;
+    if (/^https?:/.test(location.protocol)) {
+      var loadRound = function () {
+        fetch("api/vote", { cache: "no-store" }).then(function (x) { return x.ok ? x.json() : null; }).then(function (v) {
+          if (!v || !v.round) return;
+          roundLive = true;
+          var rr = v.round, t = v.tally || {};
+          var lead = (t.rows || []).slice().sort(function (a, b) { return b.pct - a.pct; })[0];
+          setReadout("round", rr.number, function (x) { return "#" + fmtNum(x); },
+            '<a href="index.html#ballot-title">' + (rr.open ? "Voting live" : "Closed") + "</a> · " + (t.voters || 0) + " wallet" + (t.voters === 1 ? "" : "s") +
+            (lead && t.voters ? " · leading: " + escapeHtml(lead.choice) : ""));
+        }).catch(function () {});
+      };
+      setTimeout(loadRound, 300);
+      setInterval(function () { if (!document.hidden) loadRound(); }, 30000);
+    }
     function setReadout(key, value, fmt, note) {
       var box = $('.readout[data-key="' + key + '"]'); if (!box) return;
       var v = box.querySelector(".readout__v"), n = box.querySelector(".readout__n");
@@ -961,9 +978,10 @@
 
       var h = d.holders || {};
       setReadout("holders", isNum(h.count) ? h.count : null, function (v) { return fmtNum(v); },
-        isNum(h.count) ? (safeUrl(h.source) ? link(h.source, "On Solscan") + " · " : "") + (h.capped ? "50k+ · " : "") + ago(h.as_of) : "Token not launched");
+        isNum(h.count) ? (safeUrl(h.source) ? link(h.source, "On Solscan") + " · " : "") + (h.capped ? "50k+ · " : "") + ago(h.as_of) : (main.getAttribute("data-ca") ? link("https://solscan.io/token/" + main.getAttribute("data-ca") + "#holders", "See every holder on Solscan") : "Token not launched"));
 
       var r = d.round || {};
+      if (!isNum(r.number) && roundLive) { /* filled from the ballot box */ } else
       setReadout("round", isNum(r.number) ? r.number : null, function (v) { return "#" + fmtNum(v); },
         isNum(r.number) ? escapeHtml((r.status || "") + (r.title ? ": " + r.title : "")) : "Round 1 opens after launch");
 

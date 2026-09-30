@@ -141,7 +141,7 @@ GH_LINE = (f'Submit work on <a href="{GITHUB_URL}" target="_blank" rel="noopener
 FAQ_ITEMS = [
   ("Is the token live?", "Yes. The only official contract address is the one on this site and pinned on @BuildDotVote. Anything posted anywhere else is not us."),
   ("What does the agent build?", "Real Solana products: a live rug radar, a smart money tracker, a treasury the agent runs itself and more. Holders vote on the order."),
-  ("How does voting work?", "When a round opens, balances are snapshotted. You sign a message naming your choice. Weight follows balance up to a cap, and the full list of signatures is published so anyone can recount."),
+  ("How does voting work?", "While a round is open, you sign a message naming your choice. Weight is what you hold when you vote, checked again when the round closes, up to a cap, and the full list of signatures is published so anyone can recount."),
   ("Can whales take over a vote?", "Each wallet's weight is capped at a set share of the round's total vote. The cap is 5%. A cap does not stop someone splitting tokens across wallets, so we publish every signature for anyone to check."),
   ("Where do creator fees go?", "API costs, buybacks, contributor rewards and a reserve. The split is on the tokenomics page. Every claim and spend links to its record."),
   ("Will you ever ask me to sign a transaction to vote?", "No. Voting is a signed message only. If something asks for a transaction, an approval or your seed phrase, it is a scam."),
@@ -169,7 +169,7 @@ SVG_STEPS = [
  '''<svg viewBox="0 0 240 180" class="ill"><path class="ill__frame" d="M70 80l50-24 50 24v56l-50 24-50-24z"/><path class="ill__line" d="M70 80l50 24 50-24M120 104v56"/><path class="ill__check" pathLength="1" d="M100 128l14 14 26-30"/><path class="ill__up" d="M120 44V14M108 26l12-12 12 12"/></svg>''',
 ]
 STEP_TEXT = [
- ("Snapshot","When a round opens, holder balances are recorded at one fixed point. Buying after the snapshot does not change that round."),
+ ("Hold","Your weight is the tokens you hold when you vote, checked again when the round closes. The lower number counts, so moving tokens to a second wallet does not count twice."),
  ("Vote","Holders sign a message for one option. Weight follows balance, capped so no single wallet can decide a round. No transaction, no gas."),
  ("Build","The agent builds the winner in a public repo. Commits and API spend post to the live build page as they happen."),
  ("Ship","The result goes live with a plain write up of what worked, what broke and what it cost. Then the next round opens."),
@@ -365,7 +365,7 @@ ROADMAP = f'''<main id="main">
     <ol class="timeline">
 {tl(1, "Foundations", "done", "This site, the whitepaper, the fee rules and the agent's working setup: a public repo, hard usage limits and full logging. The agent is already building in public.", "the site is live, the whitepaper is public and the agent can run end to end on a test task.")}
 {tl(2, "Launch", "done", "The token is live. Supply, holders and the fee split are public and linked from this site.", "the token exists and the final parameters are posted and linked from this site.")}
-{tl(3, "Voting backend", "done", "Balance snapshots, signed message checks and a public tally that anyone can recompute from the raw signatures.", "a test round runs with real signatures and the tally can be reproduced by someone outside the team.")}
+{tl(3, "Voting backend", "done", "Balance checks, signed message checks and a public tally that anyone can recompute from the raw signatures.", "a test round runs with real signatures and the tally can be reproduced by someone outside the team.")}
 {tl(4, "Live dashboard", "live", "One page for commits, API spend and creator fee claims, each linked to its source record.", "every number on the dashboard links to a commit, an invoice log or a transaction.")}
 {tl(5, "Round 1", "next", "The first real ballot. Holders vote, the agent builds the winner in public and ships it.", "the winning tool is live and its build log and costs are public.")}
 {tl(6, "Ongoing rounds", "", "Regular rounds, with the rules adjusted in public as we learn what works.", "this never finishes by design. Each round gets its own write up.")}
@@ -412,7 +412,7 @@ TOKENOMICS = f'''<main id="main" data-token-api="{'api/token' if CA else ''}">
         <tbody>
           <tr><th scope="row">Supply</th><td><span data-supply>Read live from the chain.</span>{SUPPLY_LINK}<span class="pill pill--done">Onchain</span></td></tr>
           <tr><th scope="row">Distribution</th><td>Every holder is public. <span data-holders></span>{HOLDERS_LINK}<span class="pill pill--done">Onchain</span></td></tr>
-          <tr><th scope="row">Voting weight</th><td>Weight follows your balance at the round's snapshot. One wallet, one signed choice per round.<span class="pill pill--done">Final</span></td></tr>
+          <tr><th scope="row">Voting weight</th><td>The tokens you hold when you vote, checked again when the round closes. The lower number counts. One wallet, one signed choice per round.<span class="pill pill--done">Final</span></td></tr>
           <tr><th scope="row">Whale cap</th><td>No wallet counts for more than 5% of a round's total vote weight, however much it holds. While fewer than 20 wallets have voted, the limit is an equal share per wallet.<span class="pill pill--done">Final</span></td></tr>
           <tr><th scope="row">Minimum to vote</th><td>Posted with each round's ballot, so spam wallets can be filtered.<span class="pill pill--done">Per round</span></td></tr>
           <tr><th scope="row">Utility</th><td>Voting on what the agent builds next. Nothing else is promised.<span class="pill pill--done">Final</span></td></tr>
@@ -430,9 +430,9 @@ WP_SECTIONS = [
 <p>AI agents now make small software cheap to produce. But an agent working in private is just another black box. Build.vote tries to fix both sides: holders choose, and the work and the money stay visible.</p>'''),
 ("mechanism", "Mechanism", '''<p>A round runs in four steps.</p>
 <ol>
-<li><strong>Snapshot.</strong> When a round opens, holder balances are recorded at a fixed point. Balances after that point do not affect the round.</li>
+<li><strong>Hold.</strong> A wallet's weight is its token balance when it votes. When the round closes, every voting wallet is checked again and the lower of the two balances counts. Moving tokens to another wallet after voting lowers the first wallet's weight, so the same tokens never count twice.</li>
 <li><strong>Vote.</strong> Each holder signs a plain text message naming the round, their choice, their wallet, a random nonce and a timestamp. No transaction is involved.</li>
-<li><strong>Tally.</strong> Signatures are checked against the snapshot. Weight follows snapshot balance, capped so no wallet counts for more than 5% of the round's total counted weight. While fewer than 20 wallets have voted, a 5% limit is impossible, so the limit is an equal share (1 divided by the number of voters). If a wallet signs more than once, its latest valid signature counts. The full list of signatures is published so anyone can recompute the result.</li>
+<li><strong>Tally.</strong> Each signature is checked against its wallet. Weight follows the balance rule above, capped so no wallet counts for more than 5% of the round's total counted weight. While fewer than 20 wallets have voted, a 5% limit is impossible, so the limit is an equal share (1 divided by the number of voters). If a wallet signs more than once, its latest valid signature counts. The full list of signatures is published so anyone can recompute the result.</li>
 <li><strong>Build and ship.</strong> The agent builds the winning option in public, then the result ships with a write up of what worked, what broke and what it cost.</li>
 </ol>
 <p>Ballot options are proposed in public before each round. The round 1 ballot is posted on X before voting opens.</p>'''),
@@ -505,7 +505,7 @@ WHITEPAPER = f'''<main id="main">
 def readout(key, label, note):
     return f'<div class="readout" data-key="{key}"><dt>{label}</dt><dd class="readout__v">—</dd><dd class="readout__n">{note}</dd></div>'
 
-LIVE = f"""<main id="main" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL}" data-chain="{'api/token' if CA else ''}">
+LIVE = f"""<main id="main" data-ca="{CA}" data-live-json="{LIVE_JSON}" data-github="{GITHUB_URL}" data-chain="{'api/token' if CA else ''}">
   <section class="page-head wrap">
     <h1 data-split>Live build</h1>
     <p class="lead">Watch the agent work in real time: every file it reads, every edit, every command, what each session cost and where the fees went. Nothing here is typed by hand.</p>
