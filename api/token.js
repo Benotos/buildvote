@@ -40,6 +40,29 @@ async function call(url, method, params) {
   return j.result;
 }
 
+
+// Paged version first (Alchemy's getProgramAccountsV2 works on free plans); plain getProgramAccounts as fallback.
+async function programAccounts(callFn, program, cfg) {
+  try {
+    const all = [];
+    let key = null;
+    for (let page = 0; page < 200; page++) {
+      const opts = Object.assign({}, cfg, { limit: 5000 });
+      if (key) opts.paginationKey = key;
+      const r = await callFn("getProgramAccountsV2", [program, opts]);
+      const v = r && r.value ? r.value : r;
+      if (!v || !Array.isArray(v.accounts)) throw new Error("no v2");
+      all.push(...v.accounts);
+      key = v.paginationKey;
+      if (typeof key !== "string" || !key) return all;
+    }
+    return all;
+  } catch (e) {
+    if (!/not found|not supported|no v2|unknown|-32601/i.test(e.message)) throw e;
+    return (await callFn("getProgramAccounts", [program, cfg])) || [];
+  }
+}
+
 // ---------- holders ----------
 function readU64LE(buf, off) {
   let v = 0n;
@@ -61,7 +84,7 @@ async function holders(url, mint) {
     const filters = [{ memcmp: { offset: 0, bytes: mint } }];
     if (program === TOKEN_PROGRAM) filters.push({ dataSize: 165 });
     // owner (32 bytes at 32) + amount (8 bytes at 64)
-    const list = await call(url, "getProgramAccounts", [program, { encoding: "base64", dataSlice: { offset: 32, length: 40 }, filters }]);
+    const list = await programAccounts((m, p) => call(url, m, p), program, { encoding: "base64", dataSlice: { offset: 32, length: 40 }, filters });
     for (const acc of list || []) {
       const raw = Buffer.from(acc.account.data[0], "base64");
       if (raw.length < 40) continue;
