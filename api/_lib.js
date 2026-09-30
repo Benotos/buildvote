@@ -77,9 +77,15 @@ function hashToObj(arr) {
 async function call(method, params) {
   const url = env("SOLANA_RPC_URL");
   if (!/^https:\/\//.test(url)) throw new Error("SOLANA_RPC_URL not set");
-  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
-  if (!r.ok) throw new Error("rpc " + r.status);
-  const j = await r.json();
+  let j;
+  for (let attempt = 0; ; attempt++) {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
+    if (r.status === 429 && attempt < 5) { await new Promise((ok) => setTimeout(ok, 1000 * (attempt + 1))); continue; }
+    if (!r.ok) throw new Error("rpc " + r.status);
+    j = await r.json();
+    if (j.error && attempt < 5 && (j.error.code === 429 || /rate|limit|exceed/i.test(j.error.message || ""))) { await new Promise((ok) => setTimeout(ok, 1000 * (attempt + 1))); continue; }
+    break;
+  }
   if (j.error) throw new Error(method + ": " + (j.error.message || "error"));
   return j.result;
 }

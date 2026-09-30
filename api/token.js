@@ -17,13 +17,22 @@ const B58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const TTL = 120 * 1000;
 const MAX_TX = 60; // most recent creator transactions scanned per refresh
 let cache = { at: 0, body: null };
+const good = {}; // last good value per field, reused if a later refresh fails
 
 function env(k) { return (process.env[k] || "").trim(); }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function rpc(url, body) {
-  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  if (!r.ok) throw new Error(`rpc ${r.status}`);
-  return r.json();
+  // Free RPC plans rate limit (429). Back off and retry instead of failing.
+  for (let attempt = 0; ; attempt++) {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (r.status === 429 && attempt < 4) { await sleep(800 * (attempt + 1)); continue; }
+    if (!r.ok) throw new Error(`rpc ${r.status}`);
+    const j = await r.json();
+    const limited = (x) => x && x.error && (x.error.code === 429 || /rate|limit|exceed/i.test(x.error.message || ""));
+    if (attempt < 4 && (Array.isArray(j) ? j.some(limited) : limited(j))) { await sleep(800 * (attempt + 1)); continue; }
+    return j;
+  }
 }
 async function call(url, method, params) {
   const j = await rpc(url, { jsonrpc: "2.0", id: 1, method, params });
@@ -100,8 +109,8 @@ async function feeClaims(url, creator, mint, vaults) {
   const sigs = await call(url, "getSignaturesForAddress", [creator, { limit: MAX_TX }]);
   const ok = (sigs || []).filter((s) => !s.err);
   const claims = [];
-  for (let i = 0; i < ok.length; i += 20) {
-    const chunk = ok.slice(i, i + 20);
+  for (let i = 0; i < ok.length; i += 10) {
+    const chunk = ok.slice(i, i + 10);
     const batch = chunk.map((s, j) => ({ jsonrpc: "2.0", id: j, method: "getTransaction",
       params: [s.signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0, commitment: "confirmed" }] }));
     let res = await rpc(url, batch);
@@ -131,22 +140,29 @@ module.exports = async function handler(req, res) {
     return res.end(cache.body);
   }
   const out = { configured: true, ca: mint, updated_at: new Date().toISOString(), holders: null, fees: null, supply: null, errors: [] };
-  const [h, f, sp] = await Promise.allSettled([
-    holders(url, mint),
-    B58.test(creator) ? feeClaims(url, creator, mint, vaults) : Promise.resolve(null),
-    call(url, "getTokenSupply", [mint]),
-  ]);
-  if (sp.status === "fulfilled" && sp.value && sp.value.value) out.supply = { amount: sp.value.value.uiAmountString, decimals: sp.value.value.decimals };
-  else if (sp.status === "rejected") out.errors.push("supply: " + sp.reason.message);
-  if (h.status === "fulfilled") out.holders = { count: h.value.count, as_of: out.updated_at, source: `https://solscan.io/token/${mint}#holders` };
-  else out.errors.push("holders: " + h.reason.message);
-  if (f.status === "fulfilled" && f.value) {
-    const total = f.value.reduce((s, c) => s + c.amount, 0);
-    out.fees = { total_sol: Math.round(total * 1e6) / 1e6, claims: f.value, method: vaults.size ? "vault" : "heuristic", scanned: MAX_TX };
-  } else if (f.status === "rejected") out.errors.push("fees: " + f.reason.message);
+  // One at a time, so a free RPC plan is not hit with everything at once.
+  try {
+    const sp = await call(url, "getTokenSupply", [mint]);
+    good.supply = { amount: sp.value.uiAmountString, decimals: sp.value.decimals };
+  } catch (e) { out.errors.push("supply: " + e.message); }
+  try {
+    const h = await holders(url, mint);
+    good.holders = { count: h.count, as_of: out.updated_at, source: `https://solscan.io/token/${mint}#holders` };
+  } catch (e) { out.errors.push("holders: " + e.message); }
+  if (B58.test(creator)) {
+    try {
+      const f = await feeClaims(url, creator, mint, vaults);
+      const total = f.reduce((s, c) => s + c.amount, 0);
+      good.fees = { total_sol: Math.round(total * 1e6) / 1e6, claims: f, method: vaults.size ? "vault" : "heuristic", scanned: MAX_TX };
+    } catch (e) { out.errors.push("fees: " + e.message); }
+  }
+  out.supply = good.supply || null;
+  out.holders = good.holders || null;
+  out.fees = good.fees || null;
   const body = JSON.stringify(out);
-  if (!out.errors.length) cache = { at: Date.now(), body };
-  res.setHeader("Cache-Control", out.errors.length ? "no-store" : "s-maxage=120, stale-while-revalidate=600");
+  cache = { at: out.errors.length ? Date.now() - TTL / 2 : Date.now(), body };
+  // Shared CDN cache: every visitor reads the same copy, so the RPC is called about once a minute, not once per visitor.
+  res.setHeader("Cache-Control", out.errors.length ? "s-maxage=60, stale-while-revalidate=300" : "s-maxage=120, stale-while-revalidate=600");
   res.end(body);
 };
 module.exports._test = { claimAmount, holders, feeClaims, b58 };
