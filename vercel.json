@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "src": "/offline.html", "dest": "/offline.html" },
+    { "src": "/(.*)", "dest": "/offline.html", "status": 503 }
+  ]
+}
