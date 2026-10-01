@@ -11,8 +11,8 @@ FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox=
 # ---- Edit these, then run: python3 gen.py ----
 NAME = "Build.vote"        # project name, swapped in everywhere
 HANDLE = "BuildDotVote"    # X handle without @
-CA = "Ef4P1cmK9ot9pzQ9TfFczjKgs7qTpzYuHqQkRHj7pump"                    # contract address; leave empty until launch
-BUY_URL = "https://pump.fun/coin/Ef4P1cmK9ot9pzQ9TfFczjKgs7qTpzYuHqQkRHj7pump"               # e.g. the pump.fun page; leave empty until launch
+CA = "#"                    # contract address; leave empty until launch
+BUY_URL = "https://pump.fun/coin/#"               # e.g. the pump.fun page; leave empty until launch
 LOGO_FILE = "logo.jpg"     # put your own logo image in this folder with this name to use it; delete it to use the drawn logo
 AGENT_REPO = "https://github.com/builddotvote/buildvote-agent"            # the AGENT's public repo, e.g. https://github.com/Benotos/buildvote-agent (not the website repo)
 LIVE_JSON = ""             # leave empty: read from the agent repo's status branch. Set a path only to override.

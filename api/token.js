@@ -168,13 +168,22 @@ module.exports = async function handler(req, res) {
     const sp = await call(url, "getTokenSupply", [mint]);
     good.supply = { amount: sp.value.uiAmountString, decimals: sp.value.decimals };
   } catch (e) { out.errors.push("supply: " + e.message); }
-  // Holder counts need a heavy RPC call that many free plans block. Try it, and if it fails wait 30 minutes before trying again.
-  if (!good.holdersFailAt || Date.now() - good.holdersFailAt > 30 * 60 * 1000) {
-    try {
-      const h = await holders(url, mint);
-      good.holders = { count: h.count, as_of: out.updated_at, source: `https://solscan.io/token/${mint}#holders` };
-      good.holdersFailAt = 0;
-    } catch (e) { good.holdersFailAt = Date.now(); out.notes = ["holders: not available on this RPC plan (" + e.message + ")"]; }
+  // Holder count: Jupiter's free token API first (no RPC cost), then our own RPC count as a fallback.
+  try {
+    const r = await fetch("https://lite-api.jup.ag/tokens/v2/search?query=" + mint, { headers: { accept: "application/json" } });
+    const list = r.ok ? await r.json() : [];
+    const t = (Array.isArray(list) ? list : []).find((x) => x && x.id === mint);
+    if (t && typeof t.holderCount === "number") {
+      good.holders = { count: t.holderCount, as_of: out.updated_at, source: `https://solscan.io/token/${mint}#holders`, via: "jupiter" };
+    } else throw new Error("not listed on Jupiter");
+  } catch (e) {
+    if (!good.holdersFailAt || Date.now() - good.holdersFailAt > 30 * 60 * 1000) {
+      try {
+        const h = await holders(url, mint);
+        good.holders = { count: h.count, as_of: out.updated_at, source: `https://solscan.io/token/${mint}#holders`, via: "rpc" };
+        good.holdersFailAt = 0;
+      } catch (e2) { good.holdersFailAt = Date.now(); out.notes = ["holders unavailable: " + e.message + "; " + e2.message]; }
+    }
   }
   if (B58.test(creator)) {
     try {
