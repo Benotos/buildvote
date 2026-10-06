@@ -11,8 +11,8 @@ FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox=
 # ---- Edit these, then run: python3 gen.py ----
 NAME = "Build.vote"        # project name, swapped in everywhere
 HANDLE = "BuildDotVote"    # X handle without @
-CA = "74WaYjeXSSVqQxks4Sfrtupq2wPbDCgjod8qyWUkpump"                    # contract address; leave empty until launch
-BUY_URL = "https://pump.fun/coin/74WaYjeXSSVqQxks4Sfrtupq2wPbDCgjod8qyWUkpump"
+CA = ""                    # contract address; leave empty until launch
+BUY_URL = ""               # e.g. the pump.fun page; leave empty until launch
 LOGO_FILE = "logo.jpg"     # put your own logo image in this folder with this name to use it; delete it to use the drawn logo
 AGENT_REPO = "https://github.com/builddotvote/buildvote-agent"            # the AGENT's public repo, e.g. https://github.com/Benotos/buildvote-agent (not the website repo)
 LIVE_JSON = ""             # leave empty: read from the agent repo's status branch. Set a path only to override.
@@ -233,7 +233,7 @@ INDEX = f'''<main id="main">
     <div class="marquee__track">{MARQUEE}{MARQUEE}</div>
   </div>
 
-  <section class="wrap stats" aria-label="Live numbers" data-stats data-github="{GITHUB_URL}">
+  <section class="wrap stats" aria-label="Live numbers" data-stats data-chain="{'api/token' if CA else ''}" data-github="{GITHUB_URL}">
     <div class="stats__grid">
       <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Creator fees claimed</span><b class="stat__v" data-stat="fees">—</b><small data-stat-note="fees">From Solana</small></div>
       <div class="stat card" data-spot><span class="stat__label"><i class="stat__dot"></i>Agent commits</span><b class="stat__v" data-stat="commits">—</b><small data-stat-note="commits">Public repo</small></div>

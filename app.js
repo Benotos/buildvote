@@ -1130,7 +1130,7 @@
     function num(n, d) { return Number(n).toLocaleString("en-US", { maximumFractionDigits: d || 0 }); }
     function short(n) { n = Number(n); return n >= 1e9 ? num(n / 1e9, 2) + "B" : n >= 1e6 ? num(n / 1e6, 1) + "M" : num(n); }
     function load() {
-      fetch("api/token", { cache: "no-store" }).then(function (x) { return x.ok ? x.json() : null; }).then(function (d) {
+      if (box.getAttribute("data-chain")) fetch(box.getAttribute("data-chain"), { cache: "no-store" }).then(function (x) { return x.ok ? x.json() : null; }).then(function (d) {
         if (!d || !d.configured) return;
         if (d.fees) put("fees", num(d.fees.total_sol, 2) + " SOL", d.fees.claims.length + " claim" + (d.fees.claims.length === 1 ? "" : "s") + " on Solana");
         if (d.supply) put("supply", short(d.supply.amount), "Read from the chain");
